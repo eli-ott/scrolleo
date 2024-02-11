@@ -16,6 +16,8 @@ export class Scrolleo {
 	throttle: boolean;
 	/** The delay at which the scroll is throttled */
 	throttleDelay: number;
+	/** The size of the scroll (0-100% of screen size) */
+	scrollPercentage: number;
 	/** The minimum scroll the user can do in pixels */
 	private minScroll: number = 0;
 	/** The maximum scroll the user can do in pixels */
@@ -37,6 +39,7 @@ export class Scrolleo {
 	 * @param {boolean} draggable If the container can also be dragged
 	 * @param {boolean} throttle If we throttle the scroll (good for apple magic mouse)
 	 * @param {number} throttleDelay The amount of time in milliseconds the user can't scroll for
+	 * @param {number} scrollPercentage The size of the scroll (0-100% of screen size)
 	 */
 	constructor(
 		element: HTMLElement,
@@ -45,7 +48,8 @@ export class Scrolleo {
 		smoothness: number = 0.25,
 		draggable: boolean = true,
 		throttle: boolean = true,
-		throttleDelay: number = 150
+		throttleDelay: number = 150,
+		scrollPercentage: number = 20
 	) {
 		this.element = element;
 		this.ease = ease;
@@ -54,6 +58,7 @@ export class Scrolleo {
 		this.draggable = draggable;
 		this.throttle = throttle;
 		this.throttleDelay = throttleDelay;
+		this.scrollPercentage = scrollPercentage;
 	}
 
 	/**
@@ -62,10 +67,25 @@ export class Scrolleo {
 	public init(): void {
 		this.maxScroll = this.element.getBoundingClientRect().width;
 
+		const observer = new MutationObserver(this.observerCallback);
+		observer.observe(this.element, { childList: true, subtree: true });
+
 		this.setElementsSpeed();
 		this.setListener();
 
 		this.canScroll = true;
+	}
+
+	/**
+	 * The media observer callback
+	 * 
+	 * @param {MutationRecord[]} mutationList The mutation list
+	 * @param {MutationObserver} observer The mutation Observer
+	 */
+	private observerCallback(mutationList: MutationRecord[], observer: MutationObserver): void {
+		for(const mutation of mutationList) {
+            console.log(mutation);
+		}
 	}
 
 	/**
