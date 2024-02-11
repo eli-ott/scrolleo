@@ -1,3 +1,5 @@
+import type { ScrolleoConstructor } from './types/Scrolleo';
+
 /**
  * The scroll class
  */
@@ -18,6 +20,8 @@ export class Scrolleo {
 	throttleDelay: number;
 	/** The size of the scroll (0-100% of screen size) */
 	scrollPercentage: number;
+	/** The current scroll */
+	private currentScroll: number = 0;
 	/** The minimum scroll the user can do in pixels */
 	private minScroll: number = 0;
 	/** The maximum scroll the user can do in pixels */
@@ -25,32 +29,25 @@ export class Scrolleo {
 	/** If the user can scroll (to throttle the scroll mostly) */
 	private canScroll: boolean = false;
 	/** The wheel event abort signal  */
-	private wheelSignal: AbortSignal = new AbortSignal();
+	private wheelSignal: AbortController = new AbortController();
 	/** The drag abort signal */
-	private dragSignal: AbortSignal = new AbortSignal();
+	private dragSignal: AbortController = new AbortController();
 
 	/**
 	 * Constructor
 	 *
-	 * @param {HTMLElement} element The container of the scroll
-	 * @param {string} ease The easing method
-	 * @param {'horizontal' | 'vertical'} direction The direction of scroll
-	 * @param {number} smoothness The smoothness of the scroll
-	 * @param {boolean} draggable If the container can also be dragged
-	 * @param {boolean} throttle If we throttle the scroll (good for apple magic mouse)
-	 * @param {number} throttleDelay The amount of time in milliseconds the user can't scroll for
-	 * @param {number} scrollPercentage The size of the scroll (0-100% of screen size)
+	 * @param {ScrolleoConstructor} ScrolleoConstructor The constructor for the scroll
 	 */
-	constructor(
-		element: HTMLElement,
-		ease: string = 'cubic-bezier(.19,.57,.51,.99)',
-		direction: 'horizontal' | 'vertical' = 'horizontal',
-		smoothness: number = 0.25,
-		draggable: boolean = true,
-		throttle: boolean = true,
-		throttleDelay: number = 150,
-		scrollPercentage: number = 20
-	) {
+	constructor({
+		element,
+		ease = 'cubic-bezier(.19,.57,.51,.99)',
+		direction = 'horizontal',
+		smoothness = 0.25,
+		draggable = true,
+		throttle = true,
+		throttleDelay = 150,
+		scrollPercentage = 20
+	}: ScrolleoConstructor) {
 		this.element = element;
 		this.ease = ease;
 		this.direction = direction;
@@ -65,27 +62,61 @@ export class Scrolleo {
 	 * Initializing Scrolleo
 	 */
 	public init(): void {
-		this.maxScroll = this.element.getBoundingClientRect().width;
+		this.maxScroll = this.calculateMaxScroll();
 
 		const observer = new MutationObserver(this.observerCallback);
-		observer.observe(this.element, { childList: true, subtree: true });
+		observer.observe(this.element, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
 
 		this.setElementsSpeed();
+
+		//setting the elements transitions
+		this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(child => {
+			let childTransition = child.computedStyleMap().get('transition');
+
+			child.style.transition = `${childTransition}, transform ${this.smoothness}s ${this.ease}`;
+		});
+
 		this.setListener();
 
 		this.canScroll = true;
 	}
 
 	/**
-	 * The media observer callback
-	 * 
-	 * @param {MutationRecord[]} mutationList The mutation list
-	 * @param {MutationObserver} observer The mutation Observer
+	 * Reset the whole scroll and stops the event listeners
 	 */
-	private observerCallback(mutationList: MutationRecord[], observer: MutationObserver): void {
-		for(const mutation of mutationList) {
-            console.log(mutation);
+	public reset(): void {
+		this.currentScroll = 0;
+		this.canScroll = false;
+		this.maxScroll = 0;
+		this.removeListeners();
+	}
+
+	/**
+	 * Remove all the events listeners
+	 */
+	private removeListeners(): void {
+		this.wheelSignal.abort();
+		this.dragSignal.abort();
+	}
+
+	/**
+	 * Calculate the max possible scroll based on the scroll direction
+	 *
+	 * @returns {number} The max possible scroll in pixels
+	 */
+	private calculateMaxScroll(): number {
+		if (this.direction === 'vertical') {
+			return this.element.getBoundingClientRect().height;
+		} else {
+			return this.element.getBoundingClientRect().width;
 		}
+	}
+
+	/**
+	 * Whenever the childs elements' style of the container changes we set their speed
+	 */
+	private observerCallback(): void {
+		this.setElementsSpeed();
 	}
 
 	/**
@@ -105,13 +136,10 @@ export class Scrolleo {
 	 */
 	private setElementsSpeed(): void {
 		this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(child => {
-			let childTransition = child.computedStyleMap().get('transition');
-
-			if (this.elementVisible(child)) {
-				child.style.transition = `${childTransition}, transform ${this.smoothness * parseFloat(child.dataset.scrollSpeed!)}s 
-				${this.ease}`;
+			if (child.dataset.scrollSpeed && this.elementVisible(child)) {
+				child.dataset.scrollStep = (this.scrollPercentage * parseFloat(child.dataset.scrollSpeed)).toString();
 			} else {
-				child.style.transition = `${childTransition}, transform ${this.smoothness}s ${this.ease}`;
+				child.dataset.scrollStep = this.scrollPercentage.toString();
 			}
 		});
 	}
@@ -125,28 +153,30 @@ export class Scrolleo {
 			e => {
 				if (this.canScroll) {
 					if (this.throttle) this.throttleScroll();
+
+					this.scroll();
 				}
 			},
 			{
-				signal: this.wheelSignal
+				signal: this.wheelSignal.signal
 			}
 		);
 
 		if (this.draggable) {
 			this.element.addEventListener('mousedown', e => {}, {
-				signal: this.dragSignal
+				signal: this.dragSignal.signal
 			});
 
 			this.element.addEventListener('mousemove', e => {}, {
-				signal: this.dragSignal
+				signal: this.dragSignal.signal
 			});
 
 			this.element.addEventListener('mouseup', e => {}, {
-				signal: this.dragSignal
+				signal: this.dragSignal.signal
 			});
 
 			this.element.addEventListener('mouseleave', e => {}, {
-				signal: this.dragSignal
+				signal: this.dragSignal.signal
 			});
 		}
 	}
@@ -154,11 +184,19 @@ export class Scrolleo {
 	/**
 	 * Throttle the scroll
 	 */
-	throttleScroll() {
+	private throttleScroll() {
 		this.canScroll = false;
 
 		setTimeout(() => {
 			this.canScroll = true;
 		}, this.throttleDelay);
+	}
+
+	/**
+	 * Scroll the elements
+	 */
+	private scroll() {
+		//do the scroll according to the dataset scrollStep attribute
+		//maybe check the last element's scroll distance and if it is equal to the container width is reached the end
 	}
 }
