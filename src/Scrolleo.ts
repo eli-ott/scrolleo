@@ -146,6 +146,8 @@ export class Scrolleo {
 		this.element.addEventListener(
 			'wheel',
 			e => {
+				e.preventDefault();
+
 				if (this.canScroll) {
 					if (this.throttle) this.throttleScroll();
 
@@ -193,26 +195,28 @@ export class Scrolleo {
 	 * @param {number} deltaY The direction of the scroll
 	 */
 	private calculateScroll(deltaY: number): void {
-		this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(child => {
-			let currentScroll: number;
+		if (document.querySelectorAll<HTMLElement>(':scope > *')) {
+			this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(child => {
+				let currentScroll: number;
 
-			//calculating the scroll depending on the direction the user scroll (up or down)
-			if (deltaY > 0) {
-				currentScroll = clamp(
-					parseFloat(child.dataset.currentScroll!) - parseFloat(child.dataset.scrollStep!),
-					this.minScroll,
-					this.maxScroll
-				);
-			} else {
-				currentScroll = clamp(
-					parseFloat(child.dataset.currentScroll!) + parseFloat(child.dataset.scrollStep!),
-					this.minScroll,
-					this.maxScroll
-				);
-			}
+				//calculating the scroll depending on the direction the user scroll (up or down)
+				if (deltaY > 0) {
+					currentScroll = clamp(
+						parseFloat(child.dataset.currentScroll!) - parseFloat(child.dataset.scrollStep!),
+						this.minScroll,
+						this.maxScroll
+					);
+				} else {
+					currentScroll = clamp(
+						parseFloat(child.dataset.currentScroll!) + parseFloat(child.dataset.scrollStep!),
+						this.minScroll,
+						this.maxScroll
+					);
+				}
 
-			this.applyScroll(child, currentScroll);
-		});
+				this.applyScroll(child, currentScroll);
+			});
+		}
 	}
 
 	/**
