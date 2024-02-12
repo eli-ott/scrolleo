@@ -1,4 +1,5 @@
-import type { ScrolleoConstructor } from './types/Scrolleo';
+import type { ScrolleoConstructor } from './types/ScrolleoConstructor';
+import { clamp } from './utils/clamp';
 
 /**
  * The scroll class
@@ -64,7 +65,7 @@ export class Scrolleo {
 	public init(): void {
 		this.maxScroll = this.calculateMaxScroll();
 
-		const observer = new MutationObserver(this.observerCallback);
+		const observer = new MutationObserver(this.setElementsSpeed);
 		observer.observe(this.element, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
 
 		this.setElementsSpeed();
@@ -113,13 +114,6 @@ export class Scrolleo {
 	}
 
 	/**
-	 * Whenever the childs elements' style of the container changes we set their speed
-	 */
-	private observerCallback(): void {
-		this.setElementsSpeed();
-	}
-
-	/**
 	 * If the element is visible on the screen
 	 *
 	 * @param {Element} element The element to check
@@ -154,7 +148,7 @@ export class Scrolleo {
 				if (this.canScroll) {
 					if (this.throttle) this.throttleScroll();
 
-					this.scroll();
+					this.scroll(e.deltaY);
 				}
 			},
 			{
@@ -194,9 +188,19 @@ export class Scrolleo {
 
 	/**
 	 * Scroll the elements
+	 * 
+	 * @param {number} deltaY The direction of the scroll
 	 */
-	private scroll() {
+	private scroll(deltaY: number) {
+		const containerStyle = window.getComputedStyle(this.element);
+		const containerTransformStyle = new WebKitCSSMatrix(containerStyle.transform);
+		const containerTranslateX = containerTransformStyle.e;
+		const containerTranslateY = containerTransformStyle.f;
+
 		//do the scroll according to the dataset scrollStep attribute
 		//maybe check the last element's scroll distance and if it is equal to the container width is reached the end
+		document.querySelectorAll<HTMLElement>(':scope > *').forEach(child => {
+			console.log(clamp(this.currentScroll + parseFloat(child.dataset.scrollStep!), this.minScroll, this.maxScroll));
+		});
 	}
 }
