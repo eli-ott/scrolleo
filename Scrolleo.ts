@@ -1,5 +1,5 @@
 import type { ScrolleoConstructor } from './types/ScrolleoConstructor';
-import { clamp } from './utils/clamp';
+import { clamp, convertToPx } from './utils';
 
 /**
  * The scroll class
@@ -42,7 +42,7 @@ export class Scrolleo {
 	constructor({
 		element,
 		ease = 'cubic-bezier(.19,.57,.51,.99)',
-		direction = 'horizontal',
+		direction = 'vertical',
 		smoothness = 0.25,
 		draggable = true,
 		throttle = true,
@@ -75,6 +75,9 @@ export class Scrolleo {
 			let childTransition = child.computedStyleMap().get('transition');
 
 			child.style.transition = `${childTransition}, transform ${this.smoothness}s ${this.ease}`;
+
+			//setting the current scroll to 0 for each elements
+			child.dataset.currentScroll = '0';
 		});
 
 		this.setListener();
@@ -131,9 +134,9 @@ export class Scrolleo {
 	private setElementsSpeed(): void {
 		this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(child => {
 			if (child.dataset.scrollSpeed && this.elementVisible(child)) {
-				child.dataset.scrollStep = (this.scrollPercentage * parseFloat(child.dataset.scrollSpeed)).toString();
+				child.dataset.scrollStep = convertToPx(this.scrollPercentage * parseFloat(child.dataset.scrollSpeed), this.direction).toString();
 			} else {
-				child.dataset.scrollStep = this.scrollPercentage.toString();
+				child.dataset.scrollStep = convertToPx(this.scrollPercentage, this.direction).toString();
 			}
 		});
 	}
@@ -188,7 +191,7 @@ export class Scrolleo {
 
 	/**
 	 * Scroll the elements
-	 * 
+	 *
 	 * @param {number} deltaY The direction of the scroll
 	 */
 	private scroll(deltaY: number) {
@@ -197,10 +200,9 @@ export class Scrolleo {
 		const containerTranslateX = containerTransformStyle.e;
 		const containerTranslateY = containerTransformStyle.f;
 
-		//do the scroll according to the dataset scrollStep attribute
-		//maybe check the last element's scroll distance and if it is equal to the container width is reached the end
-		document.querySelectorAll<HTMLElement>(':scope > *').forEach(child => {
-			console.log(clamp(this.currentScroll + parseFloat(child.dataset.scrollStep!), this.minScroll, this.maxScroll));
+		//store each elemeent currentscroll
+		this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(child => {
+			console.log(clamp(parseFloat(child.dataset.currentScroll!) + parseFloat(child.dataset.scrollStep!), this.minScroll, this.maxScroll));
 		});
 	}
 }
