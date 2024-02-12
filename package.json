@@ -1,14 +1,15 @@
 {
 	"devDependencies": {
+		"@types/node": "^20.11.17",
 		"typescript": "^5.3.3"
 	},
 	"name": "scrolleo",
-	"version": "1.0.0",
+	"version": "1.0.2",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
-  "files": [
-    "/dist"
-  ],
+	"files": [
+		"/dist"
+	],
 	"scripts": {
 		"build": "npx tsc",
 		"test": "echo \"Error: no test specified\" && exit 1"
