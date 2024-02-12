@@ -73,10 +73,11 @@ class Scrolleo {
      */
     calculateMaxScroll() {
         if (this.direction === 'vertical') {
-            return -this.element.getBoundingClientRect().height;
+            //adding the window height/width
+            return -this.element.getBoundingClientRect().height + window.outerHeight;
         }
         else {
-            return -this.element.getBoundingClientRect().width;
+            return -this.element.getBoundingClientRect().width + window.outerWidth;
         }
     }
     /**

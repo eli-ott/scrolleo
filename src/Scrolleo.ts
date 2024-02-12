@@ -108,9 +108,10 @@ export class Scrolleo {
 	 */
 	private calculateMaxScroll(): number {
 		if (this.direction === 'vertical') {
-			return -this.element.getBoundingClientRect().height - window.outerHeight;
+			//adding the window height/width
+			return -this.element.getBoundingClientRect().height + window.outerHeight;
 		} else {
-			return -this.element.getBoundingClientRect().width - window.outerWidth;
+			return -this.element.getBoundingClientRect().width + window.outerWidth;
 		}
 	}
 
