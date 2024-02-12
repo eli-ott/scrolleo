@@ -151,7 +151,7 @@ export class Scrolleo {
 				if (this.canScroll) {
 					if (this.throttle) this.throttleScroll();
 
-					this.scroll(e.deltaY);
+					this.calculateScroll(e.deltaY);
 				}
 			},
 			{
@@ -181,7 +181,7 @@ export class Scrolleo {
 	/**
 	 * Throttle the scroll
 	 */
-	private throttleScroll() {
+	private throttleScroll(): void {
 		this.canScroll = false;
 
 		setTimeout(() => {
@@ -190,19 +190,52 @@ export class Scrolleo {
 	}
 
 	/**
-	 * Scroll the elements
+	 * Calculate the scroll for each element
 	 *
 	 * @param {number} deltaY The direction of the scroll
 	 */
-	private scroll(deltaY: number) {
+	private calculateScroll(deltaY: number): void {
+		this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(child => {
+			let currentScroll: number;
+
+			//calculating the scroll depending on the direction the user scroll (up or down)
+			if (deltaY > 0) {
+				currentScroll = clamp(
+					parseFloat(child.dataset.currentScroll!) - parseFloat(child.dataset.scrollStep!),
+					this.minScroll,
+					this.maxScroll
+				);
+			} else {
+				currentScroll = clamp(
+					parseFloat(child.dataset.currentScroll!) + parseFloat(child.dataset.scrollStep!),
+					this.minScroll,
+					this.maxScroll
+				);
+			}
+
+			this.applyScroll(child, currentScroll);
+		});
+	}
+
+	/**
+	 * Apply the calculated scroll to the elements
+	 *
+	 * @param {HTMLElement} element The element to apply the scroll to
+	 * @param {number} scroll The scroll amount
+	 */
+	private applyScroll(element: HTMLElement, scroll: number): void {
 		const containerStyle = window.getComputedStyle(this.element);
 		const containerTransformStyle = new WebKitCSSMatrix(containerStyle.transform);
 		const containerTranslateX = containerTransformStyle.e;
 		const containerTranslateY = containerTransformStyle.f;
 
-		//store each elemeent currentscroll
-		this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(child => {
-			console.log(clamp(parseFloat(child.dataset.currentScroll!) + parseFloat(child.dataset.scrollStep!), this.minScroll, this.maxScroll));
-		});
+		//applying the transform based on the scorll direction
+		if (this.direction === 'vertical') {
+			element.style.transform = `translateY(${scroll}px) translateX(${containerTranslateX}px)`;
+		} else if (this.direction === 'horizontal') {
+			element.style.transform = `translateY(${containerTranslateY}px) translateX(${scroll}px)`;
+		}
+		//settting the currentScroll for the element
+		element.dataset.currentScroll = scroll.toString();
 	}
 }
