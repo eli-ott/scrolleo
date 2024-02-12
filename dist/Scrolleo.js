@@ -108,6 +108,7 @@ class Scrolleo {
      */
     setListener() {
         this.element.addEventListener('wheel', e => {
+            e.preventDefault();
             if (this.canScroll) {
                 if (this.throttle)
                     this.throttleScroll();
@@ -146,17 +147,19 @@ class Scrolleo {
      * @param {number} deltaY The direction of the scroll
      */
     calculateScroll(deltaY) {
-        this.element.querySelectorAll(':scope > *').forEach(child => {
-            let currentScroll;
-            //calculating the scroll depending on the direction the user scroll (up or down)
-            if (deltaY > 0) {
-                currentScroll = (0, utils_1.clamp)(parseFloat(child.dataset.currentScroll) - parseFloat(child.dataset.scrollStep), this.minScroll, this.maxScroll);
-            }
-            else {
-                currentScroll = (0, utils_1.clamp)(parseFloat(child.dataset.currentScroll) + parseFloat(child.dataset.scrollStep), this.minScroll, this.maxScroll);
-            }
-            this.applyScroll(child, currentScroll);
-        });
+        if (document.querySelectorAll(':scope > *')) {
+            this.element.querySelectorAll(':scope > *').forEach(child => {
+                let currentScroll;
+                //calculating the scroll depending on the direction the user scroll (up or down)
+                if (deltaY > 0) {
+                    currentScroll = (0, utils_1.clamp)(parseFloat(child.dataset.currentScroll) - parseFloat(child.dataset.scrollStep), this.minScroll, this.maxScroll);
+                }
+                else {
+                    currentScroll = (0, utils_1.clamp)(parseFloat(child.dataset.currentScroll) + parseFloat(child.dataset.scrollStep), this.minScroll, this.maxScroll);
+                }
+                this.applyScroll(child, currentScroll);
+            });
+        }
     }
     /**
      * Apply the calculated scroll to the elements
