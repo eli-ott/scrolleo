@@ -52,6 +52,7 @@ To change an element's speed (must be a direct children of the scroll container)
 |`throttle`|`boolean`|`true`|If the scroll is throttled so the user can't scroll for a specfic delay (great for Apple Magic Mouse and infinite wheel)|
 |`throttleDelay`|`number`|`100`|The delay in milliseconds for which the user can't scroll|
 |`scrollPercentage`|`number`|`20`|The percentage of the window that gets scrolled each time|
+|`offsetBottom`|`number`|`0`|The percentage of the window to remove at the end of the scroll|
 
 ## Instance methods
 
@@ -64,4 +65,4 @@ To change an element's speed (must be a direct children of the scroll container)
 
 |Attribute|Type|Description|
 |---|---|---|
-|`data-scroll-speed`|`number`|Define the speed of the element (must be direct children of the scroll container)|
+|`data-scroll-speed`|`number`|Define the speed of the element (must be direct children of the scroll container). Warning if the last element is faster there will be a gap at the end of the scroll to compensate for that change the `offsetBottom` option|

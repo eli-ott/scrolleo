@@ -10,6 +10,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * @returns {number} The clamped value
  */
 function clamp(value, min, max) {
-    return Math.min(Math.max(value, max), min);
+    return Math.min(Math.max(value, min), max);
 }
 exports.default = clamp;

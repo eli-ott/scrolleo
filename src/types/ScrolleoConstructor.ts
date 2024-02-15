@@ -18,4 +18,6 @@ export interface ScrolleoConstructor {
 	throttleDelay?: number;
 	/** The percentage of the windows to scroll each time (default '20') */
 	scrollPercentage?: number;
+	/** The percentage of the window to remove at the end of the scroll (default: '0')  */
+	offsetBottom?: number;
 }

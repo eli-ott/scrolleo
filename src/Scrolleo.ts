@@ -21,6 +21,8 @@ export class Scrolleo {
 	throttleDelay: number;
 	/** The percentage of the windows to scroll each time (default '20') */
 	scrollPercentage: number;
+	/** The percentage of the window to remove at the end of the scroll (default: '0') */
+	offsetBottom: number;
 	/** The minimum scroll the user can do in pixels */
 	private minScroll: number = 0;
 	/** The maximum scroll the user can do in pixels */
@@ -45,7 +47,8 @@ export class Scrolleo {
 		draggable = false,
 		throttle = true,
 		throttleDelay = 100,
-		scrollPercentage = 20
+		scrollPercentage = 20,
+		offsetBottom = 0
 	}: ScrolleoConstructor) {
 		this.element = element;
 		this.ease = ease;
@@ -55,6 +58,7 @@ export class Scrolleo {
 		this.throttle = throttle;
 		this.throttleDelay = throttleDelay;
 		this.scrollPercentage = scrollPercentage;
+		this.offsetBottom = offsetBottom;
 	}
 
 	/**
@@ -64,7 +68,7 @@ export class Scrolleo {
 		this.maxScroll = this.calculateMaxScroll();
 
 		//creating an observer to change element's speed if it is visible
-		const observer = new MutationObserver(this.setElementsSpeed);
+		const observer = new MutationObserver(this.setElementsSpeed.bind(this));
 		observer.observe(this.element, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
 
 		//initializing the element's speed
@@ -78,7 +82,7 @@ export class Scrolleo {
 
 			//setting the current scroll to 0 for each elements
 			child.dataset.currentScroll = '0';
-			if(!child.dataset.scrollSpeed) child.dataset.scrollSpeed = '1';
+			if (!child.dataset.scrollSpeed) child.dataset.scrollSpeed = '1';
 		});
 
 		this.setListener();
@@ -109,41 +113,40 @@ export class Scrolleo {
 	 */
 	private calculateMaxScroll(): number {
 		if (this.direction === 'vertical') {
-			return this.element.getBoundingClientRect().height + this.element.getBoundingClientRect().top - window.innerHeight;
+			return (
+				this.element.getBoundingClientRect().height +
+				this.element.getBoundingClientRect().top -
+				window.innerHeight -
+				convertToPx(this.offsetBottom, this.direction)
+			);
 		} else {
-			return this.element.getBoundingClientRect().width + this.element.getBoundingClientRect().left - window.innerWidth;
+			return (
+				this.element.getBoundingClientRect().width +
+				this.element.getBoundingClientRect().left -
+				window.innerWidth -
+				convertToPx(this.offsetBottom, this.direction)
+			);
 		}
 	}
 
 	/**
-	 * If the element is visible on the screen
-	 *
-	 * @param {Element} element The element to check
-	 * @returns {boolean} If the element is visible or not
-	 */
-	private elementVisible(element: Element): boolean {
-		let elementInfos = element.getBoundingClientRect();
-		let viewHeight = Math.max(window.innerHeight, document.documentElement.clientHeight);
-		return !(elementInfos.bottom < 0 || elementInfos.top - viewHeight >= 0);
-	}
-
-	/**
-	 * Create the elements' scroll speed
+	 * Set the elements' scroll speed
 	 */
 	private setElementsSpeed(): void {
-		this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(child => {
-			if (child.dataset.scrollSpeed && this.elementVisible(child)) {
-				child.dataset.scrollStep = convertToPx(this.scrollPercentage * parseFloat(child.dataset.scrollSpeed), this.direction).toString();
-			} else {
-				child.dataset.scrollStep = convertToPx(this.scrollPercentage, this.direction).toString();
-			}
-		});
+		if (this.element && this.element.querySelectorAll<HTMLElement>(':scope > *')) {
+			this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(child => {
+				child.dataset.scrollStep = convertToPx(this.scrollPercentage * parseFloat(child.dataset.scrollSpeed!), this.direction).toString();
+			});
+		}
 	}
 
 	/**
 	 * Setting all the listeners for the scroll and drag
 	 */
 	private setListener(): void {
+		//avoid the default scroll on other elements
+		document.querySelector<HTMLElement>('body')!.style.overflow = 'hidden';
+
 		this.element.addEventListener(
 			'wheel',
 			e => {
@@ -196,7 +199,7 @@ export class Scrolleo {
 	 * @param {number} deltaY The direction of the scroll
 	 */
 	private calculateScroll(deltaY: number): void {
-		if (document.querySelectorAll<HTMLElement>(':scope > *')) {
+		if (this.element && this.element.querySelectorAll<HTMLElement>(':scope > *')) {
 			//calculating the max scroll if it changes
 			this.maxScroll = this.calculateMaxScroll();
 
