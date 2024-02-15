@@ -42,7 +42,7 @@ export class Scrolleo {
 		ease = 'cubic-bezier(0.19,0.57,0.51,0.99)',
 		direction = 'vertical',
 		smoothness = 0.25,
-		draggable = true,
+		draggable = false,
 		throttle = true,
 		throttleDelay = 100,
 		scrollPercentage = 20
@@ -78,6 +78,7 @@ export class Scrolleo {
 
 			//setting the current scroll to 0 for each elements
 			child.dataset.currentScroll = '0';
+			if(!child.dataset.scrollSpeed) child.dataset.scrollSpeed = '1';
 		});
 
 		this.setListener();
@@ -108,10 +109,9 @@ export class Scrolleo {
 	 */
 	private calculateMaxScroll(): number {
 		if (this.direction === 'vertical') {
-			//adding the window height/width
-			return -this.element.getBoundingClientRect().height + window.outerHeight;
+			return this.element.getBoundingClientRect().height + this.element.getBoundingClientRect().top - window.innerHeight;
 		} else {
-			return -this.element.getBoundingClientRect().width + window.outerWidth;
+			return this.element.getBoundingClientRect().width + this.element.getBoundingClientRect().left - window.innerWidth;
 		}
 	}
 
@@ -197,21 +197,24 @@ export class Scrolleo {
 	 */
 	private calculateScroll(deltaY: number): void {
 		if (document.querySelectorAll<HTMLElement>(':scope > *')) {
+			//calculating the max scroll if it changes
+			this.maxScroll = this.calculateMaxScroll();
+
 			this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(child => {
 				let currentScroll: number;
 
 				//calculating the scroll depending on the direction the user scroll (up or down)
-				if (deltaY > 0) {
+				if (deltaY < 0) {
 					currentScroll = clamp(
 						parseFloat(child.dataset.currentScroll!) - parseFloat(child.dataset.scrollStep!),
 						this.minScroll,
-						this.maxScroll
+						this.maxScroll * parseFloat(child.dataset.scrollSpeed!)
 					);
 				} else {
 					currentScroll = clamp(
 						parseFloat(child.dataset.currentScroll!) + parseFloat(child.dataset.scrollStep!),
 						this.minScroll,
-						this.maxScroll
+						this.maxScroll * parseFloat(child.dataset.scrollSpeed!)
 					);
 				}
 
@@ -234,9 +237,9 @@ export class Scrolleo {
 
 		//applying the transform based on the scorll direction
 		if (this.direction === 'vertical') {
-			element.style.transform = `translateY(${scroll}px) translateX(${containerTranslateX}px)`;
+			element.style.transform = `translateY(${-scroll}px) translateX(${containerTranslateX}px)`;
 		} else if (this.direction === 'horizontal') {
-			element.style.transform = `translateY(${containerTranslateY}px) translateX(${scroll}px)`;
+			element.style.transform = `translateY(${containerTranslateY}px) translateX(${-scroll}px)`;
 		}
 		//settting the currentScroll for the element
 		element.dataset.currentScroll = scroll.toString();
