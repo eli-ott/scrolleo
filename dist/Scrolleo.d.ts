@@ -19,6 +19,8 @@ export declare class Scrolleo {
     throttleDelay: number;
     /** The percentage of the windows to scroll each time (default '20') */
     scrollPercentage: number;
+    /** The percentage of the window to remove at the end of the scroll (default: '0') */
+    offsetBottom: number;
     /** The minimum scroll the user can do in pixels */
     private minScroll;
     /** The maximum scroll the user can do in pixels */
@@ -34,7 +36,7 @@ export declare class Scrolleo {
      *
      * @param {ScrolleoConstructor} ScrolleoConstructor The constructor for the scroll
      */
-    constructor({ element, ease, direction, smoothness, draggable, throttle, throttleDelay, scrollPercentage }: ScrolleoConstructor);
+    constructor({ element, ease, direction, smoothness, draggable, throttle, throttleDelay, scrollPercentage, offsetBottom }: ScrolleoConstructor);
     /**
      * Initializing Scrolleo
      */
@@ -54,14 +56,7 @@ export declare class Scrolleo {
      */
     private calculateMaxScroll;
     /**
-     * If the element is visible on the screen
-     *
-     * @param {Element} element The element to check
-     * @returns {boolean} If the element is visible or not
-     */
-    private elementVisible;
-    /**
-     * Create the elements' scroll speed
+     * Set the elements' scroll speed
      */
     private setElementsSpeed;
     /**

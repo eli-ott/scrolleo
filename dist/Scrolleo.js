@@ -11,7 +11,7 @@ class Scrolleo {
      *
      * @param {ScrolleoConstructor} ScrolleoConstructor The constructor for the scroll
      */
-    constructor({ element, ease = 'cubic-bezier(0.19,0.57,0.51,0.99)', direction = 'vertical', smoothness = 0.25, draggable = false, throttle = true, throttleDelay = 100, scrollPercentage = 20 }) {
+    constructor({ element, ease = 'cubic-bezier(0.19,0.57,0.51,0.99)', direction = 'vertical', smoothness = 0.25, draggable = false, throttle = true, throttleDelay = 100, scrollPercentage = 20, offsetBottom = 0 }) {
         /** The minimum scroll the user can do in pixels */
         this.minScroll = 0;
         /** The maximum scroll the user can do in pixels */
@@ -30,6 +30,7 @@ class Scrolleo {
         this.throttle = throttle;
         this.throttleDelay = throttleDelay;
         this.scrollPercentage = scrollPercentage;
+        this.offsetBottom = offsetBottom;
     }
     /**
      * Initializing Scrolleo
@@ -37,7 +38,7 @@ class Scrolleo {
     init() {
         this.maxScroll = this.calculateMaxScroll();
         //creating an observer to change element's speed if it is visible
-        const observer = new MutationObserver(this.setElementsSpeed);
+        const observer = new MutationObserver(this.setElementsSpeed.bind(this));
         observer.observe(this.element, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
         //initializing the element's speed
         this.setElementsSpeed();
@@ -75,40 +76,34 @@ class Scrolleo {
      */
     calculateMaxScroll() {
         if (this.direction === 'vertical') {
-            return this.element.getBoundingClientRect().height + this.element.getBoundingClientRect().top - window.innerHeight;
+            return (this.element.getBoundingClientRect().height +
+                this.element.getBoundingClientRect().top -
+                window.innerHeight -
+                (0, utils_1.convertToPx)(this.offsetBottom, this.direction));
         }
         else {
-            return this.element.getBoundingClientRect().width + this.element.getBoundingClientRect().left - window.innerWidth;
+            return (this.element.getBoundingClientRect().width +
+                this.element.getBoundingClientRect().left -
+                window.innerWidth -
+                (0, utils_1.convertToPx)(this.offsetBottom, this.direction));
         }
     }
     /**
-     * If the element is visible on the screen
-     *
-     * @param {Element} element The element to check
-     * @returns {boolean} If the element is visible or not
-     */
-    elementVisible(element) {
-        let elementInfos = element.getBoundingClientRect();
-        let viewHeight = Math.max(window.innerHeight, document.documentElement.clientHeight);
-        return !(elementInfos.bottom < 0 || elementInfos.top - viewHeight >= 0);
-    }
-    /**
-     * Create the elements' scroll speed
+     * Set the elements' scroll speed
      */
     setElementsSpeed() {
-        this.element.querySelectorAll(':scope > *').forEach(child => {
-            if (child.dataset.scrollSpeed && this.elementVisible(child)) {
+        if (this.element && this.element.querySelectorAll(':scope > *')) {
+            this.element.querySelectorAll(':scope > *').forEach(child => {
                 child.dataset.scrollStep = (0, utils_1.convertToPx)(this.scrollPercentage * parseFloat(child.dataset.scrollSpeed), this.direction).toString();
-            }
-            else {
-                child.dataset.scrollStep = (0, utils_1.convertToPx)(this.scrollPercentage, this.direction).toString();
-            }
-        });
+            });
+        }
     }
     /**
      * Setting all the listeners for the scroll and drag
      */
     setListener() {
+        //avoid the default scroll on other elements
+        document.querySelector('body').style.overflow = 'hidden';
         this.element.addEventListener('wheel', e => {
             e.preventDefault();
             if (this.canScroll) {
@@ -149,7 +144,7 @@ class Scrolleo {
      * @param {number} deltaY The direction of the scroll
      */
     calculateScroll(deltaY) {
-        if (document.querySelectorAll(':scope > *')) {
+        if (this.element && this.element.querySelectorAll(':scope > *')) {
             //calculating the max scroll if it changes
             this.maxScroll = this.calculateMaxScroll();
             this.element.querySelectorAll(':scope > *').forEach(child => {
