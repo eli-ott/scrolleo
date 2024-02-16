@@ -13,6 +13,8 @@ export declare class Scrolleo {
     smoothness: number;
     /** If we can also drag to scroll (default 'false') */
     draggable: boolean;
+    /** The drag speed (default '1') */
+    dragSpeed: number;
     /** If we throttle the scroll (default 'true') */
     throttle: boolean;
     /** The delay to wait between each scroll in milliseconds (default '150') */
@@ -27,6 +29,10 @@ export declare class Scrolleo {
     private maxScroll;
     /** If the user can scroll (to throttle the scroll mostly) */
     private canScroll;
+    /** If the user can drag to scroll */
+    private canDrag;
+    /** The initial position of the user drag */
+    private dragInitialPosition;
     /** The wheel event abort signal  */
     private wheelSignal;
     /** The drag abort signal */
@@ -36,7 +42,7 @@ export declare class Scrolleo {
      *
      * @param {ScrolleoConstructor} ScrolleoConstructor The constructor for the scroll
      */
-    constructor({ element, ease, direction, smoothness, draggable, throttle, throttleDelay, scrollPercentage, offsetBottom }: ScrolleoConstructor);
+    constructor({ element, ease, direction, smoothness, draggable, dragSpeed, throttle, throttleDelay, scrollPercentage, offsetBottom }: ScrolleoConstructor);
     /**
      * Initializing Scrolleo
      */
@@ -73,6 +79,12 @@ export declare class Scrolleo {
      * @param {number} deltaY The direction of the scroll
      */
     private calculateScroll;
+    /**
+     * Calculate the drag distance of the user
+     *
+     * @param {number} mousePosition The current mouse position
+     */
+    private calculateDrag;
     /**
      * Apply the calculated scroll to the elements
      *

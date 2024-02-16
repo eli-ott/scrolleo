@@ -11,13 +11,17 @@ class Scrolleo {
      *
      * @param {ScrolleoConstructor} ScrolleoConstructor The constructor for the scroll
      */
-    constructor({ element, ease = 'cubic-bezier(0.19,0.57,0.51,0.99)', direction = 'vertical', smoothness = 0.25, draggable = false, throttle = true, throttleDelay = 100, scrollPercentage = 20, offsetBottom = 0 }) {
+    constructor({ element, ease = 'cubic-bezier(0.19,0.57,0.51,0.99)', direction = 'vertical', smoothness = 0.25, draggable = false, dragSpeed = 1, throttle = true, throttleDelay = 100, scrollPercentage = 20, offsetBottom = 0 }) {
         /** The minimum scroll the user can do in pixels */
         this.minScroll = 0;
         /** The maximum scroll the user can do in pixels */
         this.maxScroll = 0;
         /** If the user can scroll (to throttle the scroll mostly) */
         this.canScroll = false;
+        /** If the user can drag to scroll */
+        this.canDrag = false;
+        /** The initial position of the user drag */
+        this.dragInitialPosition = 0;
         /** The wheel event abort signal  */
         this.wheelSignal = new AbortController();
         /** The drag abort signal */
@@ -27,6 +31,7 @@ class Scrolleo {
         this.direction = direction;
         this.smoothness = smoothness;
         this.draggable = draggable;
+        this.dragSpeed = dragSpeed;
         this.throttle = throttle;
         this.throttleDelay = throttleDelay;
         this.scrollPercentage = scrollPercentage;
@@ -115,16 +120,52 @@ class Scrolleo {
             signal: this.wheelSignal.signal
         });
         if (this.draggable) {
-            this.element.addEventListener('mousedown', e => { }, {
+            this.element.addEventListener('mousedown', e => {
+                //preventing the user to scroll
+                this.canScroll = false;
+                //allowing the user to drag
+                this.canDrag = true;
+                //setting the initial position of the user mouse
+                if (this.direction === 'horizontal') {
+                    this.dragInitialPosition = e.clientX;
+                }
+                else {
+                    this.dragInitialPosition = e.clientY;
+                }
+            }, {
                 signal: this.dragSignal.signal
             });
-            this.element.addEventListener('mousemove', e => { }, {
+            this.element.addEventListener('mousemove', e => {
+                if (this.canDrag) {
+                    e.preventDefault();
+                    if (this.direction === 'horizontal') {
+                        this.calculateDrag(e.clientX);
+                    }
+                    else {
+                        this.calculateDrag(e.clientY);
+                    }
+                }
+            }, {
                 signal: this.dragSignal.signal
             });
-            this.element.addEventListener('mouseup', e => { }, {
+            this.element.addEventListener('mouseup', () => {
+                //allowing the user to sroll again
+                this.canScroll = true;
+                //preventing the user to drag
+                this.canDrag = false;
+                //reseting the initial drag position
+                this.dragInitialPosition = 0;
+            }, {
                 signal: this.dragSignal.signal
             });
-            this.element.addEventListener('mouseleave', e => { }, {
+            this.element.addEventListener('mouseleave', () => {
+                //allowing the user to sroll again
+                this.canScroll = true;
+                //preventing the user to drag
+                this.canDrag = false;
+                //reseting the initial drag position
+                this.dragInitialPosition = 0;
+            }, {
                 signal: this.dragSignal.signal
             });
         }
@@ -158,6 +199,22 @@ class Scrolleo {
                 }
                 this.applyScroll(child, currentScroll);
             });
+        }
+    }
+    /**
+     * Calculate the drag distance of the user
+     *
+     * @param {number} mousePosition The current mouse position
+     */
+    calculateDrag(mousePosition) {
+        if (this.element && this.element.querySelectorAll(':scope > *')) {
+            let currentScroll;
+            this.element.querySelectorAll(':scope > *').forEach(child => {
+                currentScroll = (0, utils_1.clamp)(parseFloat(child.dataset.currentScroll) +
+                    (this.dragInitialPosition - mousePosition) * parseFloat(child.dataset.scrollSpeed) * this.dragSpeed, this.minScroll, this.maxScroll * parseFloat(child.dataset.scrollSpeed));
+                this.applyScroll(child, currentScroll);
+            });
+            this.dragInitialPosition = mousePosition;
         }
     }
     /**
