@@ -12,6 +12,8 @@ export interface ScrolleoConstructor {
 	smoothness?: number;
 	/** If we can also drag to scroll (default 'false') */
 	draggable?: boolean;
+	/** The drag speed (default '1') */
+	dragSpeed?: number;
 	/** If we throttle the scroll (default 'true') */
 	throttle?: boolean;
 	/** The delay to wait between each scroll in milliseconds (default '100') */

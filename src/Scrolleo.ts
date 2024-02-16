@@ -15,6 +15,8 @@ export class Scrolleo {
 	smoothness: number;
 	/** If we can also drag to scroll (default 'false') */
 	draggable: boolean;
+	/** The drag speed (default '1') */
+	dragSpeed: number;
 	/** If we throttle the scroll (default 'true') */
 	throttle: boolean;
 	/** The delay to wait between each scroll in milliseconds (default '150') */
@@ -29,6 +31,10 @@ export class Scrolleo {
 	private maxScroll: number = 0;
 	/** If the user can scroll (to throttle the scroll mostly) */
 	private canScroll: boolean = false;
+	/** If the user can drag to scroll */
+	private canDrag: boolean = false;
+	/** The initial position of the user drag */
+	private dragInitialPosition: number = 0;
 	/** The wheel event abort signal  */
 	private wheelSignal: AbortController = new AbortController();
 	/** The drag abort signal */
@@ -45,6 +51,7 @@ export class Scrolleo {
 		direction = 'vertical',
 		smoothness = 0.25,
 		draggable = false,
+		dragSpeed = 1,
 		throttle = true,
 		throttleDelay = 100,
 		scrollPercentage = 20,
@@ -55,6 +62,7 @@ export class Scrolleo {
 		this.direction = direction;
 		this.smoothness = smoothness;
 		this.draggable = draggable;
+		this.dragSpeed = dragSpeed;
 		this.throttle = throttle;
 		this.throttleDelay = throttleDelay;
 		this.scrollPercentage = scrollPercentage;
@@ -164,21 +172,73 @@ export class Scrolleo {
 		);
 
 		if (this.draggable) {
-			this.element.addEventListener('mousedown', e => {}, {
-				signal: this.dragSignal.signal
-			});
+			this.element.addEventListener(
+				'mousedown',
+				e => {
+					//preventing the user to scroll
+					this.canScroll = false;
+					//allowing the user to drag
+					this.canDrag = true;
 
-			this.element.addEventListener('mousemove', e => {}, {
-				signal: this.dragSignal.signal
-			});
+					//setting the initial position of the user mouse
+					if (this.direction === 'horizontal') {
+						this.dragInitialPosition = e.clientX;
+					} else {
+						this.dragInitialPosition = e.clientY;
+					}
+				},
+				{
+					signal: this.dragSignal.signal
+				}
+			);
 
-			this.element.addEventListener('mouseup', e => {}, {
-				signal: this.dragSignal.signal
-			});
+			this.element.addEventListener(
+				'mousemove',
+				e => {
+					if (this.canDrag) {
+						e.preventDefault();
 
-			this.element.addEventListener('mouseleave', e => {}, {
-				signal: this.dragSignal.signal
-			});
+						if (this.direction === 'horizontal') {
+							this.calculateDrag(e.clientX);
+						} else {
+							this.calculateDrag(e.clientY);
+						}
+					}
+				},
+				{
+					signal: this.dragSignal.signal
+				}
+			);
+
+			this.element.addEventListener(
+				'mouseup',
+				() => {
+					//allowing the user to sroll again
+					this.canScroll = true;
+					//preventing the user to drag
+					this.canDrag = false;
+					//reseting the initial drag position
+					this.dragInitialPosition = 0;
+				},
+				{
+					signal: this.dragSignal.signal
+				}
+			);
+
+			this.element.addEventListener(
+				'mouseleave',
+				() => {
+					//allowing the user to sroll again
+					this.canScroll = true;
+					//preventing the user to drag
+					this.canDrag = false;
+					//reseting the initial drag position
+					this.dragInitialPosition = 0;
+				},
+				{
+					signal: this.dragSignal.signal
+				}
+			);
 		}
 	}
 
@@ -223,6 +283,30 @@ export class Scrolleo {
 
 				this.applyScroll(child, currentScroll);
 			});
+		}
+	}
+
+	/**
+	 * Calculate the drag distance of the user
+	 *
+	 * @param {number} mousePosition The current mouse position
+	 */
+	private calculateDrag(mousePosition: number): void {
+		if (this.element && this.element.querySelectorAll<HTMLElement>(':scope > *')) {
+			let currentScroll: number;
+
+			this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(child => {
+				currentScroll = clamp(
+					parseFloat(child.dataset.currentScroll!) +
+						(this.dragInitialPosition - mousePosition) * parseFloat(child.dataset.scrollSpeed!) * this.dragSpeed,
+					this.minScroll,
+					this.maxScroll * parseFloat(child.dataset.scrollSpeed!)
+				);
+
+				this.applyScroll(child, currentScroll);
+			});
+
+			this.dragInitialPosition = mousePosition;
 		}
 	}
 

@@ -49,6 +49,7 @@ To change an element's speed (must be a direct children of the scroll container)
 |`direction`|`string`|`vertical`|The scroll direction `vertical` or `horizontal` only|
 |`smoothness`|`number`|`0.25`|The smoothness of the scroll, the higher the number the smoother the scroll|
 |`draggable`|`boolean`|`false`|If we can drag to scroll|
+|`dragSpeed`|`number`|`1`|The drag speed. Eg. A drag speed of `2` would mean that for every pixel dragged, the element get scrolled 2 pixels|
 |`throttle`|`boolean`|`true`|If the scroll is throttled so the user can't scroll for a specfic delay (great for Apple Magic Mouse and infinite wheel)|
 |`throttleDelay`|`number`|`100`|The delay in milliseconds for which the user can't scroll|
 |`scrollPercentage`|`number`|`20`|The percentage of the window that gets scrolled each time|
