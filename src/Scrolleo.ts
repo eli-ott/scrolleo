@@ -120,14 +120,15 @@ export class Scrolleo {
 	}
 
 	/**
-	 * Create the scroll animation for the element
-	 *
-	 * @param {HTMLElement} element The element to apply the transition to
+	 * Set the elements that needs be scrolled
 	 */
-	private setTransition(element: HTMLElement): void {
-		let elementTransition = element.computedStyleMap().get('transition');
-
-		element.style.transition = `${elementTransition}, transform ${this.smoothness}s ${this.ease}`;
+	private setScrolledElements(): void {
+		this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(element => {
+			this.scrolledElements.push(element);
+		});
+		this.element.querySelectorAll<HTMLElement>(':scope > * [data-scroll-speed]').forEach(element => {
+			this.scrolledElements.push(element);
+		});
 	}
 
 	/**
@@ -154,15 +155,14 @@ export class Scrolleo {
 	}
 
 	/**
-	 * Set the elements that will be scrolled
+	 * Create the scroll animation for the element
+	 *
+	 * @param {HTMLElement} element The element to apply the transition to
 	 */
-	private setScrolledElements(): void {
-		this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(element => {
-			this.scrolledElements.push(element);
-		});
-		this.element.querySelectorAll<HTMLElement>(':scope > * [data-scroll-speed]').forEach(element => {
-			this.scrolledElements.push(element);
-		});
+	private setTransition(element: HTMLElement): void {
+		let elementTransition = element.computedStyleMap().get('transition');
+
+		element.style.transition = `${elementTransition}, transform ${this.smoothness}s ${this.ease}`;
 	}
 
 	/**

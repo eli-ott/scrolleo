@@ -12,6 +12,8 @@ class Scrolleo {
      * @param {ScrolleoConstructor} ScrolleoConstructor The constructor for the scroll
      */
     constructor({ element, ease = 'cubic-bezier(0.19,0.57,0.51,0.99)', direction = 'vertical', smoothness = 0.25, draggable = false, dragSpeed = 1, throttle = true, throttleDelay = 100, scrollPercentage = 20, offsetBottom = 0 }) {
+        /** The elements that will be scrolled */
+        this.scrolledElements = [];
         /** The minimum scroll the user can do in pixels */
         this.minScroll = 0;
         /** The maximum scroll the user can do in pixels */
@@ -41,20 +43,23 @@ class Scrolleo {
      * Initializing Scrolleo
      */
     init() {
+        //we scroll to the top of the window
+        window.scroll(0, 0);
         this.maxScroll = this.calculateMaxScroll();
+        //set the elements that needs to be scrolled
+        this.setScrolledElements();
         //creating an observer to change element's speed if it is visible
         const observer = new MutationObserver(this.setElementsSpeed.bind(this));
         observer.observe(this.element, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
         //initializing the element's speed
         this.setElementsSpeed();
         //setting the elements transitions
-        this.element.querySelectorAll(':scope > *').forEach(child => {
-            let childTransition = child.computedStyleMap().get('transition');
-            child.style.transition = `${childTransition}, transform ${this.smoothness}s ${this.ease}`;
+        this.scrolledElements.forEach(element => {
+            this.setTransition(element);
             //setting the current scroll to 0 for each elements
-            child.dataset.currentScroll = '0';
-            if (!child.dataset.scrollSpeed)
-                child.dataset.scrollSpeed = '1';
+            element.dataset.currentScroll = '0';
+            if (!element.dataset.scrollSpeed)
+                element.dataset.scrollSpeed = '1';
         });
         this.setListener();
         this.canScroll = true;
@@ -73,6 +78,17 @@ class Scrolleo {
     removeListeners() {
         this.wheelSignal.abort();
         this.dragSignal.abort();
+    }
+    /**
+     * Set the elements that needs be scrolled
+     */
+    setScrolledElements() {
+        this.element.querySelectorAll(':scope > *').forEach(element => {
+            this.scrolledElements.push(element);
+        });
+        this.element.querySelectorAll(':scope > * [data-scroll-speed]').forEach(element => {
+            this.scrolledElements.push(element);
+        });
     }
     /**
      * Calculate the max possible scroll based on the scroll direction
@@ -94,14 +110,21 @@ class Scrolleo {
         }
     }
     /**
+     * Create the scroll animation for the element
+     *
+     * @param {HTMLElement} element The element to apply the transition to
+     */
+    setTransition(element) {
+        let elementTransition = element.computedStyleMap().get('transition');
+        element.style.transition = `${elementTransition}, transform ${this.smoothness}s ${this.ease}`;
+    }
+    /**
      * Set the elements' scroll speed
      */
     setElementsSpeed() {
-        if (this.element && this.element.querySelectorAll(':scope > *')) {
-            this.element.querySelectorAll(':scope > *').forEach(child => {
-                child.dataset.scrollStep = (0, utils_1.convertToPx)(this.scrollPercentage * parseFloat(child.dataset.scrollSpeed), this.direction).toString();
-            });
-        }
+        this.scrolledElements.forEach(child => {
+            child.dataset.scrollStep = (0, utils_1.convertToPx)(this.scrollPercentage * parseFloat(child.dataset.scrollSpeed), this.direction).toString();
+        });
     }
     /**
      * Setting all the listeners for the scroll and drag
@@ -185,21 +208,20 @@ class Scrolleo {
      * @param {number} deltaY The direction of the scroll
      */
     calculateScroll(deltaY) {
-        if (this.element && this.element.querySelectorAll(':scope > *')) {
-            //calculating the max scroll if it changes
-            this.maxScroll = this.calculateMaxScroll();
-            this.element.querySelectorAll(':scope > *').forEach(child => {
-                let currentScroll;
-                //calculating the scroll depending on the direction the user scroll (up or down)
-                if (deltaY < 0) {
-                    currentScroll = (0, utils_1.clamp)(parseFloat(child.dataset.currentScroll) - parseFloat(child.dataset.scrollStep), this.minScroll, this.maxScroll * parseFloat(child.dataset.scrollSpeed));
-                }
-                else {
-                    currentScroll = (0, utils_1.clamp)(parseFloat(child.dataset.currentScroll) + parseFloat(child.dataset.scrollStep), this.minScroll, this.maxScroll * parseFloat(child.dataset.scrollSpeed));
-                }
-                this.applyScroll(child, currentScroll);
-            });
-        }
+        //calculating the max scroll if it changes
+        this.maxScroll = this.calculateMaxScroll();
+        this.scrolledElements.forEach(child => {
+            let currentScroll;
+            //calculating the scroll depending on the direction the user scroll (up or down)
+            if (deltaY < 0) {
+                currentScroll = (0, utils_1.clamp)(parseFloat(child.dataset.currentScroll) - parseFloat(child.dataset.scrollStep), this.minScroll, this.maxScroll * parseFloat(child.dataset.scrollSpeed));
+            }
+            else {
+                currentScroll = (0, utils_1.clamp)(parseFloat(child.dataset.currentScroll) + parseFloat(child.dataset.scrollStep), this.minScroll, this.maxScroll * parseFloat(child.dataset.scrollSpeed));
+            }
+            // this.scrollFasterElements(currentScroll);
+            this.applyScroll(child, currentScroll);
+        });
     }
     /**
      * Calculate the drag distance of the user
@@ -207,15 +229,13 @@ class Scrolleo {
      * @param {number} mousePosition The current mouse position
      */
     calculateDrag(mousePosition) {
-        if (this.element && this.element.querySelectorAll(':scope > *')) {
-            let currentScroll;
-            this.element.querySelectorAll(':scope > *').forEach(child => {
-                currentScroll = (0, utils_1.clamp)(parseFloat(child.dataset.currentScroll) +
-                    (this.dragInitialPosition - mousePosition) * parseFloat(child.dataset.scrollSpeed) * this.dragSpeed, this.minScroll, this.maxScroll * parseFloat(child.dataset.scrollSpeed));
-                this.applyScroll(child, currentScroll);
-            });
-            this.dragInitialPosition = mousePosition;
-        }
+        let currentScroll;
+        this.scrolledElements.forEach(child => {
+            currentScroll = (0, utils_1.clamp)(parseFloat(child.dataset.currentScroll) +
+                (this.dragInitialPosition - mousePosition) * parseFloat(child.dataset.scrollSpeed) * this.dragSpeed, this.minScroll, this.maxScroll * parseFloat(child.dataset.scrollSpeed));
+            this.applyScroll(child, currentScroll);
+        });
+        this.dragInitialPosition = mousePosition;
     }
     /**
      * Apply the calculated scroll to the elements

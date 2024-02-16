@@ -23,6 +23,8 @@ export declare class Scrolleo {
     scrollPercentage: number;
     /** The percentage of the window to remove at the end of the scroll (default: '0') */
     offsetBottom: number;
+    /** The elements that will be scrolled */
+    private scrolledElements;
     /** The minimum scroll the user can do in pixels */
     private minScroll;
     /** The maximum scroll the user can do in pixels */
@@ -56,11 +58,21 @@ export declare class Scrolleo {
      */
     private removeListeners;
     /**
+     * Set the elements that needs be scrolled
+     */
+    private setScrolledElements;
+    /**
      * Calculate the max possible scroll based on the scroll direction
      *
      * @returns {number} The max possible scroll in pixels
      */
     private calculateMaxScroll;
+    /**
+     * Create the scroll animation for the element
+     *
+     * @param {HTMLElement} element The element to apply the transition to
+     */
+    private setTransition;
     /**
      * Set the elements' scroll speed
      */
