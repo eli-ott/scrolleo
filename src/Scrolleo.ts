@@ -25,6 +25,8 @@ export class Scrolleo {
 	scrollPercentage: number;
 	/** The percentage of the window to remove at the end of the scroll (default: '0') */
 	offsetBottom: number;
+	/** The elements that will be scrolled */
+	private scrolledElements: HTMLElement[] = [];
 	/** The minimum scroll the user can do in pixels */
 	private minScroll: number = 0;
 	/** The maximum scroll the user can do in pixels */
@@ -73,7 +75,12 @@ export class Scrolleo {
 	 * Initializing Scrolleo
 	 */
 	public init(): void {
+		//we scroll to the top of the window
+		window.scroll(0, 0);
+
 		this.maxScroll = this.calculateMaxScroll();
+		//set the elements that needs to be scrolled
+		this.setScrolledElements();
 
 		//creating an observer to change element's speed if it is visible
 		const observer = new MutationObserver(this.setElementsSpeed.bind(this));
@@ -83,14 +90,12 @@ export class Scrolleo {
 		this.setElementsSpeed();
 
 		//setting the elements transitions
-		this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(child => {
-			let childTransition = child.computedStyleMap().get('transition');
-
-			child.style.transition = `${childTransition}, transform ${this.smoothness}s ${this.ease}`;
+		this.scrolledElements.forEach(element => {
+			this.setTransition(element);
 
 			//setting the current scroll to 0 for each elements
-			child.dataset.currentScroll = '0';
-			if (!child.dataset.scrollSpeed) child.dataset.scrollSpeed = '1';
+			element.dataset.currentScroll = '0';
+			if (!element.dataset.scrollSpeed) element.dataset.scrollSpeed = '1';
 		});
 
 		this.setListener();
@@ -112,6 +117,17 @@ export class Scrolleo {
 	private removeListeners(): void {
 		this.wheelSignal.abort();
 		this.dragSignal.abort();
+	}
+
+	/**
+	 * Create the scroll animation for the element
+	 *
+	 * @param {HTMLElement} element The element to apply the transition to
+	 */
+	private setTransition(element: HTMLElement): void {
+		let elementTransition = element.computedStyleMap().get('transition');
+
+		element.style.transition = `${elementTransition}, transform ${this.smoothness}s ${this.ease}`;
 	}
 
 	/**
@@ -138,14 +154,24 @@ export class Scrolleo {
 	}
 
 	/**
+	 * Set the elements that will be scrolled
+	 */
+	private setScrolledElements(): void {
+		this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(element => {
+			this.scrolledElements.push(element);
+		});
+		this.element.querySelectorAll<HTMLElement>(':scope > * [data-scroll-speed]').forEach(element => {
+			this.scrolledElements.push(element);
+		});
+	}
+
+	/**
 	 * Set the elements' scroll speed
 	 */
 	private setElementsSpeed(): void {
-		if (this.element && this.element.querySelectorAll<HTMLElement>(':scope > *')) {
-			this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(child => {
-				child.dataset.scrollStep = convertToPx(this.scrollPercentage * parseFloat(child.dataset.scrollSpeed!), this.direction).toString();
-			});
-		}
+		this.scrolledElements.forEach(child => {
+			child.dataset.scrollStep = convertToPx(this.scrollPercentage * parseFloat(child.dataset.scrollSpeed!), this.direction).toString();
+		});
 	}
 
 	/**
@@ -259,31 +285,30 @@ export class Scrolleo {
 	 * @param {number} deltaY The direction of the scroll
 	 */
 	private calculateScroll(deltaY: number): void {
-		if (this.element && this.element.querySelectorAll<HTMLElement>(':scope > *')) {
-			//calculating the max scroll if it changes
-			this.maxScroll = this.calculateMaxScroll();
+		//calculating the max scroll if it changes
+		this.maxScroll = this.calculateMaxScroll();
 
-			this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(child => {
-				let currentScroll: number;
+		this.scrolledElements.forEach(child => {
+			let currentScroll: number;
 
-				//calculating the scroll depending on the direction the user scroll (up or down)
-				if (deltaY < 0) {
-					currentScroll = clamp(
-						parseFloat(child.dataset.currentScroll!) - parseFloat(child.dataset.scrollStep!),
-						this.minScroll,
-						this.maxScroll * parseFloat(child.dataset.scrollSpeed!)
-					);
-				} else {
-					currentScroll = clamp(
-						parseFloat(child.dataset.currentScroll!) + parseFloat(child.dataset.scrollStep!),
-						this.minScroll,
-						this.maxScroll * parseFloat(child.dataset.scrollSpeed!)
-					);
-				}
+			//calculating the scroll depending on the direction the user scroll (up or down)
+			if (deltaY < 0) {
+				currentScroll = clamp(
+					parseFloat(child.dataset.currentScroll!) - parseFloat(child.dataset.scrollStep!),
+					this.minScroll,
+					this.maxScroll * parseFloat(child.dataset.scrollSpeed!)
+				);
+			} else {
+				currentScroll = clamp(
+					parseFloat(child.dataset.currentScroll!) + parseFloat(child.dataset.scrollStep!),
+					this.minScroll,
+					this.maxScroll * parseFloat(child.dataset.scrollSpeed!)
+				);
+			}
 
-				this.applyScroll(child, currentScroll);
-			});
-		}
+			// this.scrollFasterElements(currentScroll);
+			this.applyScroll(child, currentScroll);
+		});
 	}
 
 	/**
@@ -292,22 +317,20 @@ export class Scrolleo {
 	 * @param {number} mousePosition The current mouse position
 	 */
 	private calculateDrag(mousePosition: number): void {
-		if (this.element && this.element.querySelectorAll<HTMLElement>(':scope > *')) {
-			let currentScroll: number;
+		let currentScroll: number;
 
-			this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(child => {
-				currentScroll = clamp(
-					parseFloat(child.dataset.currentScroll!) +
-						(this.dragInitialPosition - mousePosition) * parseFloat(child.dataset.scrollSpeed!) * this.dragSpeed,
-					this.minScroll,
-					this.maxScroll * parseFloat(child.dataset.scrollSpeed!)
-				);
+		this.scrolledElements.forEach(child => {
+			currentScroll = clamp(
+				parseFloat(child.dataset.currentScroll!) +
+					(this.dragInitialPosition - mousePosition) * parseFloat(child.dataset.scrollSpeed!) * this.dragSpeed,
+				this.minScroll,
+				this.maxScroll * parseFloat(child.dataset.scrollSpeed!)
+			);
 
-				this.applyScroll(child, currentScroll);
-			});
+			this.applyScroll(child, currentScroll);
+		});
 
-			this.dragInitialPosition = mousePosition;
-		}
+		this.dragInitialPosition = mousePosition;
 	}
 
 	/**
