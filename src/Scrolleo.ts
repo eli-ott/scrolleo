@@ -1,4 +1,4 @@
-import type { ScrolleoConstructor } from './types/ScrolleoConstructor';
+import type { ScrolleoConstructor, ScrollToOptions } from './types';
 import { clamp, convertToPx } from './utils';
 
 /**
@@ -82,13 +82,6 @@ export class Scrolleo {
 		//set the elements that needs to be scrolled
 		this.setScrolledElements();
 
-		//creating an observer to change element's speed if it is visible
-		const observer = new MutationObserver(this.setElementsSpeed.bind(this));
-		observer.observe(this.element, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
-
-		//initializing the element's speed
-		this.setElementsSpeed();
-
 		//setting the elements transitions
 		this.scrolledElements.forEach(element => {
 			this.setTransition(element);
@@ -96,6 +89,9 @@ export class Scrolleo {
 			//setting the current scroll to 0 for each elements
 			element.dataset.currentScroll = '0';
 			if (!element.dataset.scrollSpeed) element.dataset.scrollSpeed = '1';
+
+			//initializing the element's speed
+			this.setElementsSpeed(element);
 		});
 
 		this.setListener();
@@ -144,13 +140,16 @@ export class Scrolleo {
 				window.innerHeight -
 				convertToPx(this.offsetBottom, this.direction)
 			);
-		} else {
+		} else if (this.direction === 'horizontal') {
 			return (
 				this.element.getBoundingClientRect().width +
 				this.element.getBoundingClientRect().left -
 				window.innerWidth -
 				convertToPx(this.offsetBottom, this.direction)
 			);
+		} else {
+			console.error("Scroll direction is not valid, only possible values are 'vertical' and 'horizontal'");
+			throw new Error("Scroll direction is not valid, only possible values are 'vertical' and 'horizontal'");
 		}
 	}
 
@@ -167,11 +166,11 @@ export class Scrolleo {
 
 	/**
 	 * Set the elements' scroll speed
+	 *
+	 * @param {HTMLElement} element The element that needs its speed set
 	 */
-	private setElementsSpeed(): void {
-		this.scrolledElements.forEach(child => {
-			child.dataset.scrollStep = convertToPx(this.scrollPercentage * parseFloat(child.dataset.scrollSpeed!), this.direction).toString();
-		});
+	private setElementsSpeed(element: HTMLElement): void {
+		element.dataset.scrollStep = convertToPx(this.scrollPercentage * parseFloat(element.dataset.scrollSpeed!), this.direction).toString();
 	}
 
 	/**
@@ -226,8 +225,11 @@ export class Scrolleo {
 
 						if (this.direction === 'horizontal') {
 							this.calculateDrag(e.clientX);
-						} else {
+						} else if (this.direction === 'vertical') {
 							this.calculateDrag(e.clientY);
+						} else {
+							console.error("Scroll direction is not valid, only possible values are 'vertical' and 'horizontal'");
+							throw new Error("Scroll direction is not valid, only possible values are 'vertical' and 'horizontal'");
 						}
 					}
 				},
@@ -288,26 +290,26 @@ export class Scrolleo {
 		//calculating the max scroll if it changes
 		this.maxScroll = this.calculateMaxScroll();
 
-		this.scrolledElements.forEach(child => {
+		this.scrolledElements.forEach(element => {
 			let currentScroll: number;
 
 			//calculating the scroll depending on the direction the user scroll (up or down)
 			if (deltaY < 0) {
 				currentScroll = clamp(
-					parseFloat(child.dataset.currentScroll!) - parseFloat(child.dataset.scrollStep!),
+					parseFloat(element.dataset.currentScroll!) - parseFloat(element.dataset.scrollStep!),
 					this.minScroll,
-					this.maxScroll * parseFloat(child.dataset.scrollSpeed!)
+					this.maxScroll * parseFloat(element.dataset.scrollSpeed!)
 				);
 			} else {
 				currentScroll = clamp(
-					parseFloat(child.dataset.currentScroll!) + parseFloat(child.dataset.scrollStep!),
+					parseFloat(element.dataset.currentScroll!) + parseFloat(element.dataset.scrollStep!),
 					this.minScroll,
-					this.maxScroll * parseFloat(child.dataset.scrollSpeed!)
+					this.maxScroll * parseFloat(element.dataset.scrollSpeed!)
 				);
 			}
 
 			// this.scrollFasterElements(currentScroll);
-			this.applyScroll(child, currentScroll);
+			this.applyScroll(element, currentScroll);
 		});
 	}
 
@@ -319,15 +321,15 @@ export class Scrolleo {
 	private calculateDrag(mousePosition: number): void {
 		let currentScroll: number;
 
-		this.scrolledElements.forEach(child => {
+		this.scrolledElements.forEach(element => {
 			currentScroll = clamp(
-				parseFloat(child.dataset.currentScroll!) +
-					(this.dragInitialPosition - mousePosition) * parseFloat(child.dataset.scrollSpeed!) * this.dragSpeed,
+				parseFloat(element.dataset.currentScroll!) +
+					(this.dragInitialPosition - mousePosition) * parseFloat(element.dataset.scrollSpeed!) * this.dragSpeed,
 				this.minScroll,
-				this.maxScroll * parseFloat(child.dataset.scrollSpeed!)
+				this.maxScroll * parseFloat(element.dataset.scrollSpeed!)
 			);
 
-			this.applyScroll(child, currentScroll);
+			this.applyScroll(element, currentScroll);
 		});
 
 		this.dragInitialPosition = mousePosition;
@@ -353,5 +355,62 @@ export class Scrolleo {
 		}
 		//settting the currentScroll for the element
 		element.dataset.currentScroll = scroll.toString();
+	}
+
+	/**
+	 * Scroll a percentage of the window
+	 *
+	 * @param {number} percentage The percentage of the window to scroll
+	 */
+	public scroll(percentage: number): void {
+		let currentScroll: number;
+		this.scrolledElements.forEach(element => {
+			currentScroll = clamp(
+				convertToPx(percentage, this.direction) * parseFloat(element.dataset.scrollSpeed!),
+				this.minScroll,
+				this.maxScroll * parseFloat(element.dataset.scrollSpeed!)
+			);
+
+			this.applyScroll(element, currentScroll);
+		});
+	}
+
+	/**
+	 * Scroll to a specified element
+	 *
+	 * @param {HTMLElement} element The element to scroll to
+	 * @param {ScrollTo} options The options of the scrollTo
+	 */
+	public scrollTo(
+		element: HTMLElement,
+		options: ScrollToOptions = {
+			align: 'start',
+			margin: 0
+		}
+	): void {
+		if (!element) console.error('scrollTo element is undefined');
+
+		const rect: DOMRect = element.getBoundingClientRect();
+
+		let scrollDistance: number;
+		if (options.align === 'start') {
+			scrollDistance = rect.top / parseFloat(element.dataset.scrollSpeed!) - convertToPx(options.margin!, this.direction);
+		} else if (options.align === 'end') {
+			scrollDistance =
+				rect.bottom / parseFloat(element.dataset.scrollSpeed!) - window.innerHeight + convertToPx(options.margin!, this.direction);
+		} else {
+			console.error("Align option is invalid, only possible values are 'start' and 'end'");
+		}
+
+		let currentScroll: number;
+		this.scrolledElements.forEach(element => {
+			currentScroll = clamp(
+				scrollDistance * parseFloat(element.dataset.scrollSpeed!),
+				this.minScroll,
+				this.maxScroll * parseFloat(element.dataset.scrollSpeed!)
+			);
+
+			this.applyScroll(element, currentScroll);
+		});
 	}
 }

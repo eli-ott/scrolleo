@@ -1,4 +1,4 @@
-import type { ScrolleoConstructor } from './types/ScrolleoConstructor';
+import type { ScrolleoConstructor, ScrollToOptions } from './types';
 /**
  * The Scrolleo class
  */
@@ -75,6 +75,8 @@ export declare class Scrolleo {
     private setTransition;
     /**
      * Set the elements' scroll speed
+     *
+     * @param {HTMLElement} element The element that needs its speed set
      */
     private setElementsSpeed;
     /**
@@ -104,4 +106,17 @@ export declare class Scrolleo {
      * @param {number} scroll The scroll amount
      */
     private applyScroll;
+    /**
+     * Scroll a percentage of the window
+     *
+     * @param {number} percentage The percentage of the window to scroll
+     */
+    scroll(percentage: number): void;
+    /**
+     * Scroll to a specified element
+     *
+     * @param {HTMLElement} element The element to scroll to
+     * @param {ScrollTo} options The options of the scrollTo
+     */
+    scrollTo(element: HTMLElement, options?: ScrollToOptions): void;
 }
