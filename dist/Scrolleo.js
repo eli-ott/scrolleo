@@ -65,6 +65,7 @@ class Scrolleo {
      * Reset the whole scroll and stops the event listeners
      */
     destroy() {
+        document.querySelector('body').style.overflow = 'scroll';
         this.canScroll = false;
         this.maxScroll = 0;
         this.removeListeners();
@@ -224,7 +225,6 @@ class Scrolleo {
             else {
                 currentScroll = (0, utils_1.clamp)(parseFloat(element.dataset.currentScroll) + parseFloat(element.dataset.scrollStep), this.minScroll, this.maxScroll * parseFloat(element.dataset.scrollSpeed));
             }
-            // this.scrollFasterElements(currentScroll);
             this.applyScroll(element, currentScroll);
         });
     }
