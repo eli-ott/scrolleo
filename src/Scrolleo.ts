@@ -308,7 +308,6 @@ export class Scrolleo {
 				);
 			}
 
-			// this.scrollFasterElements(currentScroll);
 			this.applyScroll(element, currentScroll);
 		});
 	}
