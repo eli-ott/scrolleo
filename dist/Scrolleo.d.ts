@@ -74,12 +74,6 @@ export declare class Scrolleo {
      */
     private setTransition;
     /**
-     * Set the elements' scroll speed
-     *
-     * @param {HTMLElement} element The element that needs its speed set
-     */
-    private setElementsSpeed;
-    /**
      * Setting all the listeners for the scroll and drag
      */
     private setListener;
