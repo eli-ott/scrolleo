@@ -36,14 +36,6 @@ const scrolleo = new Scrolleo({
 scrolleo.init();
 ```
 
-## Speed
-
-To change an element's speed (must be a direct children of the scroll container) you just need to add an HTML attribute to that element
-
-```HTML
-<div data-scroll-speed="2"></div>
-```
-
 ## Instance options
 
 | Option             | Type          | Default                             | Description                                                                                                              |
@@ -67,9 +59,3 @@ To change an element's speed (must be a direct children of the scroll container)
 | `destroy()`  | Destroy all the scroll events              |                                                              |
 | `scroll()`   | Scroll a specific percentage of the window | `percentage` The amount you want to scroll, must be a number |
 | `scrollTo()` | Scroll to a specified element              | <div>`element` The element to scroll to, must be an HTMLElement <br>`options` The options to the scroll : <ul><li>`align` If the element to scroll to should be at the end or at the start of the window (relative to the scroll direction), must be either `start` or `end`</li><li>`margin` The percentage of the window to let between the screen border and the element, must be a number</li></ul></div>   |
-
-## Elements attributes
-
-| Attribute           | Type     | Description                                                                                                                                                                 |
-| ------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `data-scroll-speed` | `number` | Define the speed of the element. Warning if the last element is faster there will be a gap at the end of the scroll to compensate for that change the `offsetBottom` option |
