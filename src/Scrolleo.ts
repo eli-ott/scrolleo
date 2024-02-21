@@ -311,8 +311,7 @@ export class Scrolleo {
 
 		this.scrolledElements.forEach(element => {
 			currentScroll = clamp(
-				parseFloat(element.dataset.currentScroll!) +
-					(this.dragInitialPosition - mousePosition) * parseFloat(element.dataset.scrollStep!) * this.dragSpeed,
+				parseFloat(element.dataset.currentScroll!) + (this.dragInitialPosition - mousePosition) * this.dragSpeed,
 				this.minScroll,
 				this.maxScroll
 			);
