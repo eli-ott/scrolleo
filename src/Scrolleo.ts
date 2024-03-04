@@ -5,8 +5,8 @@ import { clamp, convertToPx } from './utils';
  * The Scrolleo class
  */
 export class Scrolleo {
-	/** The element to apply the scroll */
-	element: HTMLElement;
+	/** The container to apply the scroll */
+	container: HTMLElement;
 	/** The easing of the scroll (default 'cubic-bezier(0.19,0.57,0.51,0.99)') */
 	ease: string;
 	/** Scroll direction (default 'vertical') */
@@ -25,6 +25,8 @@ export class Scrolleo {
 	scrollPercentage: number;
 	/** The percentage of the window to remove at the end of the scroll (default: '0') */
 	offsetBottom: number;
+	/** The elements to scroll, if null will be the direct children of the container (default: 'null') */
+	elementsToScroll: Array<HTMLElement> | null;
 	/** The elements that will be scrolled */
 	private scrolledElements: HTMLElement[] = [];
 	/** The minimum scroll the user can do in pixels */
@@ -48,7 +50,7 @@ export class Scrolleo {
 	 * @param {ScrolleoConstructor} ScrolleoConstructor The constructor for the scroll
 	 */
 	constructor({
-		element,
+		container,
 		ease = 'cubic-bezier(0.19,0.57,0.51,0.99)',
 		direction = 'vertical',
 		smoothness = 0.25,
@@ -57,9 +59,10 @@ export class Scrolleo {
 		throttle = true,
 		throttleDelay = 100,
 		scrollPercentage = 20,
-		offsetBottom = 0
+		offsetBottom = 0,
+		elementsToScroll = null
 	}: ScrolleoConstructor) {
-		this.element = element;
+		this.container = container;
 		this.ease = ease;
 		this.direction = direction;
 		this.smoothness = smoothness;
@@ -69,6 +72,7 @@ export class Scrolleo {
 		this.throttleDelay = throttleDelay;
 		this.scrollPercentage = scrollPercentage;
 		this.offsetBottom = offsetBottom;
+		this.elementsToScroll = elementsToScroll;
 	}
 
 	/**
@@ -117,12 +121,16 @@ export class Scrolleo {
 	 * Set the elements that needs be scrolled
 	 */
 	private setScrolledElements(): void {
-		this.element.querySelectorAll<HTMLElement>(':scope > *').forEach(element => {
-			this.scrolledElements.push(element);
-		});
-		this.element.querySelectorAll<HTMLElement>(':scope > * [data-scroll-speed]').forEach(element => {
-			this.scrolledElements.push(element);
-		});
+		if (this.elementsToScroll) {
+			this.scrolledElements = this.elementsToScroll;
+		} else {
+			this.container.querySelectorAll<HTMLElement>(':scope > *').forEach(element => {
+				this.scrolledElements.push(element);
+			});
+			this.container.querySelectorAll<HTMLElement>(':scope > * [data-scroll-speed]').forEach(element => {
+				this.scrolledElements.push(element);
+			});
+		}
 	}
 
 	/**
@@ -132,19 +140,9 @@ export class Scrolleo {
 	 */
 	private calculateMaxScroll(): number {
 		if (this.direction === 'vertical') {
-			return (
-				this.element.getBoundingClientRect().height +
-				this.element.getBoundingClientRect().top -
-				window.innerHeight -
-				convertToPx(this.offsetBottom, this.direction)
-			);
+			return this.container.getBoundingClientRect().height + this.container.getBoundingClientRect().top - window.innerHeight - convertToPx(this.offsetBottom, this.direction);
 		} else if (this.direction === 'horizontal') {
-			return (
-				this.element.getBoundingClientRect().width +
-				this.element.getBoundingClientRect().left -
-				window.innerWidth -
-				convertToPx(this.offsetBottom, this.direction)
-			);
+			return this.container.getBoundingClientRect().width + this.container.getBoundingClientRect().left - window.innerWidth - convertToPx(this.offsetBottom, this.direction);
 		} else {
 			console.error("Scroll direction is not valid, only possible values are 'vertical' and 'horizontal'");
 			throw new Error("Scroll direction is not valid, only possible values are 'vertical' and 'horizontal'");
@@ -169,7 +167,7 @@ export class Scrolleo {
 		//avoid the default scroll on other elements
 		document.querySelector<HTMLElement>('body')!.style.overflow = 'hidden';
 
-		this.element.addEventListener(
+		this.container.addEventListener(
 			'wheel',
 			e => {
 				e.preventDefault();
@@ -186,7 +184,7 @@ export class Scrolleo {
 		);
 
 		if (this.draggable) {
-			this.element.addEventListener(
+			this.container.addEventListener(
 				'mousedown',
 				e => {
 					//preventing the user to scroll
@@ -206,7 +204,7 @@ export class Scrolleo {
 				}
 			);
 
-			this.element.addEventListener(
+			this.container.addEventListener(
 				'mousemove',
 				e => {
 					if (this.canDrag) {
@@ -227,7 +225,7 @@ export class Scrolleo {
 				}
 			);
 
-			this.element.addEventListener(
+			this.container.addEventListener(
 				'mouseup',
 				() => {
 					//allowing the user to sroll again
@@ -242,7 +240,7 @@ export class Scrolleo {
 				}
 			);
 
-			this.element.addEventListener(
+			this.container.addEventListener(
 				'mouseleave',
 				() => {
 					//allowing the user to sroll again
@@ -284,17 +282,9 @@ export class Scrolleo {
 
 			//calculating the scroll depending on the direction the user scroll (up or down)
 			if (deltaY < 0) {
-				currentScroll = clamp(
-					parseFloat(element.dataset.currentScroll!) - parseFloat(element.dataset.scrollStep!),
-					this.minScroll,
-					this.maxScroll
-				);
+				currentScroll = clamp(parseFloat(element.dataset.currentScroll!) - parseFloat(element.dataset.scrollStep!), this.minScroll, this.maxScroll);
 			} else {
-				currentScroll = clamp(
-					parseFloat(element.dataset.currentScroll!) + parseFloat(element.dataset.scrollStep!),
-					this.minScroll,
-					this.maxScroll
-				);
+				currentScroll = clamp(parseFloat(element.dataset.currentScroll!) + parseFloat(element.dataset.scrollStep!), this.minScroll, this.maxScroll);
 			}
 
 			this.applyScroll(element, currentScroll);
@@ -310,11 +300,7 @@ export class Scrolleo {
 		let currentScroll: number;
 
 		this.scrolledElements.forEach(element => {
-			currentScroll = clamp(
-				parseFloat(element.dataset.currentScroll!) + (this.dragInitialPosition - mousePosition) * this.dragSpeed,
-				this.minScroll,
-				this.maxScroll
-			);
+			currentScroll = clamp(parseFloat(element.dataset.currentScroll!) + (this.dragInitialPosition - mousePosition) * this.dragSpeed, this.minScroll, this.maxScroll);
 
 			this.applyScroll(element, currentScroll);
 		});
@@ -329,7 +315,7 @@ export class Scrolleo {
 	 * @param {number} scroll The scroll amount
 	 */
 	private applyScroll(element: HTMLElement, scroll: number): void {
-		const containerStyle = window.getComputedStyle(this.element);
+		const containerStyle = window.getComputedStyle(this.container);
 		const containerTransformStyle = new WebKitCSSMatrix(containerStyle.transform);
 		const containerTranslateX = containerTransformStyle.e;
 		const containerTranslateY = containerTransformStyle.f;

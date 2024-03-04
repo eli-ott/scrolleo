@@ -3,8 +3,8 @@ import type { ScrolleoConstructor, ScrollToOptions } from './types';
  * The Scrolleo class
  */
 export declare class Scrolleo {
-    /** The element to apply the scroll */
-    element: HTMLElement;
+    /** The container to apply the scroll */
+    container: HTMLElement;
     /** The easing of the scroll (default 'cubic-bezier(0.19,0.57,0.51,0.99)') */
     ease: string;
     /** Scroll direction (default 'vertical') */
@@ -23,6 +23,8 @@ export declare class Scrolleo {
     scrollPercentage: number;
     /** The percentage of the window to remove at the end of the scroll (default: '0') */
     offsetBottom: number;
+    /** The elements to scroll, if null will be the direct children of the container (default: 'null') */
+    elementsToScroll: Array<HTMLElement> | null;
     /** The elements that will be scrolled */
     private scrolledElements;
     /** The minimum scroll the user can do in pixels */
@@ -44,7 +46,7 @@ export declare class Scrolleo {
      *
      * @param {ScrolleoConstructor} ScrolleoConstructor The constructor for the scroll
      */
-    constructor({ element, ease, direction, smoothness, draggable, dragSpeed, throttle, throttleDelay, scrollPercentage, offsetBottom }: ScrolleoConstructor);
+    constructor({ container, ease, direction, smoothness, draggable, dragSpeed, throttle, throttleDelay, scrollPercentage, offsetBottom, elementsToScroll }: ScrolleoConstructor);
     /**
      * Initializing Scrolleo
      */

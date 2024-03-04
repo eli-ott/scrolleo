@@ -2,8 +2,8 @@
  * Scrolleo's constructor type
  */
 export interface ScrolleoConstructor {
-    /** The element that would have the scroll */
-    element: HTMLElement;
+    /** The container that would have the scroll */
+    container: HTMLElement;
     /** The easing of the scroll (default 'cubic-bezier(0.19,0.57,0.51,0.99)') */
     ease?: string;
     /** Scroll direction (default 'vertical') */
@@ -22,4 +22,6 @@ export interface ScrolleoConstructor {
     scrollPercentage?: number;
     /** The percentage of the window to remove at the end of the scroll (default: '0')  */
     offsetBottom?: number;
+    /** The elements to scroll, if null will be the direct children of the container (default: 'null') */
+    elementsToScroll?: Array<HTMLElement> | null;
 }

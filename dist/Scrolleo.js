@@ -11,7 +11,7 @@ class Scrolleo {
      *
      * @param {ScrolleoConstructor} ScrolleoConstructor The constructor for the scroll
      */
-    constructor({ element, ease = 'cubic-bezier(0.19,0.57,0.51,0.99)', direction = 'vertical', smoothness = 0.25, draggable = false, dragSpeed = 1, throttle = true, throttleDelay = 100, scrollPercentage = 20, offsetBottom = 0 }) {
+    constructor({ container, ease = 'cubic-bezier(0.19,0.57,0.51,0.99)', direction = 'vertical', smoothness = 0.25, draggable = false, dragSpeed = 1, throttle = true, throttleDelay = 100, scrollPercentage = 20, offsetBottom = 0, elementsToScroll = null }) {
         /** The elements that will be scrolled */
         this.scrolledElements = [];
         /** The minimum scroll the user can do in pixels */
@@ -28,7 +28,7 @@ class Scrolleo {
         this.wheelSignal = new AbortController();
         /** The drag abort signal */
         this.dragSignal = new AbortController();
-        this.element = element;
+        this.container = container;
         this.ease = ease;
         this.direction = direction;
         this.smoothness = smoothness;
@@ -38,6 +38,7 @@ class Scrolleo {
         this.throttleDelay = throttleDelay;
         this.scrollPercentage = scrollPercentage;
         this.offsetBottom = offsetBottom;
+        this.elementsToScroll = elementsToScroll;
     }
     /**
      * Initializing Scrolleo
@@ -78,12 +79,17 @@ class Scrolleo {
      * Set the elements that needs be scrolled
      */
     setScrolledElements() {
-        this.element.querySelectorAll(':scope > *').forEach(element => {
-            this.scrolledElements.push(element);
-        });
-        this.element.querySelectorAll(':scope > * [data-scroll-speed]').forEach(element => {
-            this.scrolledElements.push(element);
-        });
+        if (this.elementsToScroll) {
+            this.scrolledElements = this.elementsToScroll;
+        }
+        else {
+            this.container.querySelectorAll(':scope > *').forEach(element => {
+                this.scrolledElements.push(element);
+            });
+            this.container.querySelectorAll(':scope > * [data-scroll-speed]').forEach(element => {
+                this.scrolledElements.push(element);
+            });
+        }
     }
     /**
      * Calculate the max possible scroll based on the scroll direction
@@ -92,16 +98,10 @@ class Scrolleo {
      */
     calculateMaxScroll() {
         if (this.direction === 'vertical') {
-            return (this.element.getBoundingClientRect().height +
-                this.element.getBoundingClientRect().top -
-                window.innerHeight -
-                (0, utils_1.convertToPx)(this.offsetBottom, this.direction));
+            return this.container.getBoundingClientRect().height + this.container.getBoundingClientRect().top - window.innerHeight - (0, utils_1.convertToPx)(this.offsetBottom, this.direction);
         }
         else if (this.direction === 'horizontal') {
-            return (this.element.getBoundingClientRect().width +
-                this.element.getBoundingClientRect().left -
-                window.innerWidth -
-                (0, utils_1.convertToPx)(this.offsetBottom, this.direction));
+            return this.container.getBoundingClientRect().width + this.container.getBoundingClientRect().left - window.innerWidth - (0, utils_1.convertToPx)(this.offsetBottom, this.direction);
         }
         else {
             console.error("Scroll direction is not valid, only possible values are 'vertical' and 'horizontal'");
@@ -123,7 +123,7 @@ class Scrolleo {
     setListener() {
         //avoid the default scroll on other elements
         document.querySelector('body').style.overflow = 'hidden';
-        this.element.addEventListener('wheel', e => {
+        this.container.addEventListener('wheel', e => {
             e.preventDefault();
             if (this.canScroll) {
                 if (this.throttle)
@@ -134,7 +134,7 @@ class Scrolleo {
             signal: this.wheelSignal.signal
         });
         if (this.draggable) {
-            this.element.addEventListener('mousedown', e => {
+            this.container.addEventListener('mousedown', e => {
                 //preventing the user to scroll
                 this.canScroll = false;
                 //allowing the user to drag
@@ -149,7 +149,7 @@ class Scrolleo {
             }, {
                 signal: this.dragSignal.signal
             });
-            this.element.addEventListener('mousemove', e => {
+            this.container.addEventListener('mousemove', e => {
                 if (this.canDrag) {
                     e.preventDefault();
                     if (this.direction === 'horizontal') {
@@ -166,7 +166,7 @@ class Scrolleo {
             }, {
                 signal: this.dragSignal.signal
             });
-            this.element.addEventListener('mouseup', () => {
+            this.container.addEventListener('mouseup', () => {
                 //allowing the user to sroll again
                 this.canScroll = true;
                 //preventing the user to drag
@@ -176,7 +176,7 @@ class Scrolleo {
             }, {
                 signal: this.dragSignal.signal
             });
-            this.element.addEventListener('mouseleave', () => {
+            this.container.addEventListener('mouseleave', () => {
                 //allowing the user to sroll again
                 this.canScroll = true;
                 //preventing the user to drag
@@ -237,7 +237,7 @@ class Scrolleo {
      * @param {number} scroll The scroll amount
      */
     applyScroll(element, scroll) {
-        const containerStyle = window.getComputedStyle(this.element);
+        const containerStyle = window.getComputedStyle(this.container);
         const containerTransformStyle = new WebKitCSSMatrix(containerStyle.transform);
         const containerTranslateX = containerTransformStyle.e;
         const containerTranslateY = containerTransformStyle.f;
