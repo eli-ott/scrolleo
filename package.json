@@ -4,7 +4,7 @@
 		"typescript": "^5.3.3"
 	},
 	"name": "scrolleo",
-	"version": "1.5.0",
+	"version": "1.5.1",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"files": [

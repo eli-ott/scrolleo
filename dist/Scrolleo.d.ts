@@ -37,6 +37,8 @@ export declare class Scrolleo {
     private canDrag;
     /** The initial position of the user drag */
     private dragInitialPosition;
+    /** If scrolleo was initialized */
+    private initialized;
     /** The wheel event abort signal  */
     private wheelSignal;
     /** The drag abort signal */
@@ -51,6 +53,12 @@ export declare class Scrolleo {
      * Initializing Scrolleo
      */
     init(): void;
+    /**
+     * If the scrolleo was initialized
+     *
+     * @returns {boolean} If the scrolleo was initialized
+     */
+    isInit(): boolean;
     /**
      * Reset the whole scroll and stops the event listeners
      */

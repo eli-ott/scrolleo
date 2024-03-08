@@ -39,6 +39,8 @@ export class Scrolleo {
 	private canDrag: boolean = false;
 	/** The initial position of the user drag */
 	private dragInitialPosition: number = 0;
+	/** If scrolleo was initialized */
+	private initialized: boolean = false;
 	/** The wheel event abort signal  */
 	private wheelSignal: AbortController = new AbortController();
 	/** The drag abort signal */
@@ -97,6 +99,17 @@ export class Scrolleo {
 
 		this.setListener();
 		this.canScroll = true;
+
+		this.initialized = true;
+	}
+
+	/**
+	 * If the scrolleo was initialized
+	 *
+	 * @returns {boolean} If the scrolleo was initialized
+	 */
+	public isInit(): boolean {
+		return this.initialized;
 	}
 
 	/**
@@ -107,6 +120,7 @@ export class Scrolleo {
 		this.canScroll = false;
 		this.maxScroll = 0;
 		this.removeListeners();
+		this.initialized = false;
 	}
 
 	/**

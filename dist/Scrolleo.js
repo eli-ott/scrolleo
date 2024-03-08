@@ -24,6 +24,8 @@ class Scrolleo {
         this.canDrag = false;
         /** The initial position of the user drag */
         this.dragInitialPosition = 0;
+        /** If scrolleo was initialized */
+        this.initialized = false;
         /** The wheel event abort signal  */
         this.wheelSignal = new AbortController();
         /** The drag abort signal */
@@ -58,6 +60,15 @@ class Scrolleo {
         });
         this.setListener();
         this.canScroll = true;
+        this.initialized = true;
+    }
+    /**
+     * If the scrolleo was initialized
+     *
+     * @returns {boolean} If the scrolleo was initialized
+     */
+    isInit() {
+        return this.initialized;
     }
     /**
      * Reset the whole scroll and stops the event listeners
@@ -67,6 +78,7 @@ class Scrolleo {
         this.canScroll = false;
         this.maxScroll = 0;
         this.removeListeners();
+        this.initialized = false;
     }
     /**
      * Remove all the events listeners
