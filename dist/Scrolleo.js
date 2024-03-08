@@ -62,8 +62,8 @@ class Scrolleo {
             });
             this.setListener();
             this.canScroll = true;
+            this.initialized = true;
         }
-        this.initialized = true;
     }
     /**
      * If the scrolleo was initialized
