@@ -78,6 +78,12 @@ export declare class Scrolleo {
      */
     private calculateMaxScroll;
     /**
+     * Return the calculated max scroll
+     *
+     * @returns {number} The max scroll
+     */
+    getMaxScroll(): number;
+    /**
      * Create the scroll animation for the element
      *
      * @param {HTMLElement} element The element to apply the transition to

@@ -85,20 +85,24 @@ export class Scrolleo {
 		window.scroll(0, 0);
 
 		this.maxScroll = this.calculateMaxScroll();
-		//set the elements that needs to be scrolled
-		this.setScrolledElements();
 
-		//setting the elements transitions
-		this.scrolledElements.forEach(element => {
-			this.setTransition(element);
+		//allow to initialize multiple time without setting the listeners more than once
+		if (!this.initialized) {
+			//set the elements that needs to be scrolled
+			this.setScrolledElements();
 
-			//setting the current scroll to 0 for each elements
-			element.dataset.currentScroll = '0';
-			element.dataset.scrollStep = convertToPx(this.scrollPercentage, this.direction).toString();
-		});
+			//setting the elements transitions
+			this.scrolledElements.forEach(element => {
+				this.setTransition(element);
 
-		this.setListener();
-		this.canScroll = true;
+				//setting the current scroll to 0 for each elements
+				element.dataset.currentScroll = '0';
+				element.dataset.scrollStep = convertToPx(this.scrollPercentage, this.direction).toString();
+			});
+
+			this.setListener();
+			this.canScroll = true;
+		}
 
 		this.initialized = true;
 	}
@@ -161,6 +165,15 @@ export class Scrolleo {
 			console.error("Scroll direction is not valid, only possible values are 'vertical' and 'horizontal'");
 			throw new Error("Scroll direction is not valid, only possible values are 'vertical' and 'horizontal'");
 		}
+	}
+
+	/**
+	 * Return the calculated max scroll
+	 *
+	 * @returns {number} The max scroll
+	 */
+	public getMaxScroll(): number {
+		return this.maxScroll;
 	}
 
 	/**
