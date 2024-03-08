@@ -194,7 +194,6 @@ export class Scrolleo {
 	 * Setting all the listeners for the scroll and drag
 	 */
 	private setListener(): void {
-		console.log('setting listeners');
 		//avoid the default scroll on other elements
 		document.querySelector<HTMLElement>('body')!.style.overflow = 'hidden';
 
@@ -310,8 +309,6 @@ export class Scrolleo {
 
 		this.scrolledElements.forEach(element => {
 			let currentScroll: number;
-			console.log(this.scrolledElements);
-			console.log(element, parseFloat(element.dataset.currentScroll!), parseFloat(element.dataset.scrollStep!));
 
 			//calculating the scroll depending on the direction the user scroll (up or down)
 			if (deltaY < 0) {

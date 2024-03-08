@@ -146,7 +146,6 @@ class Scrolleo {
      * Setting all the listeners for the scroll and drag
      */
     setListener() {
-        console.log('setting listeners');
         //avoid the default scroll on other elements
         document.querySelector('body').style.overflow = 'hidden';
         this.container.addEventListener('wheel', e => {
@@ -233,8 +232,6 @@ class Scrolleo {
         this.maxScroll = this.calculateMaxScroll();
         this.scrolledElements.forEach(element => {
             let currentScroll;
-            console.log(this.scrolledElements);
-            console.log(element, parseFloat(element.dataset.currentScroll), parseFloat(element.dataset.scrollStep));
             //calculating the scroll depending on the direction the user scroll (up or down)
             if (deltaY < 0) {
                 currentScroll = (0, utils_1.clamp)(parseFloat(element.dataset.currentScroll) - parseFloat(element.dataset.scrollStep), this.minScroll, this.maxScroll);
