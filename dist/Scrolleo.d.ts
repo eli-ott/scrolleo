@@ -133,12 +133,6 @@ export declare class Scrolleo {
      */
     private applyScroll;
     /**
-     * Scroll a percentage of the window
-     *
-     * @param {number} percentage The percentage of the window to scroll
-     */
-    scroll(percentage: number): void;
-    /**
      * Return the current scroll of each scroledElements
      *
      * @returns {Array<{element: HTMLElement, currentScroll: number}>[]} The current scroll for each element

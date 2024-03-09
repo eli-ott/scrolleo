@@ -215,9 +215,7 @@ export class Scrolleo {
 	 * @param {HTMLElement} element The element to apply the transition to
 	 */
 	private setTransition(element: HTMLElement): void {
-		let elementTransition = element.computedStyleMap().get('transition');
-
-		element.style.transition = `${elementTransition}, transform ${this.smoothness}s ${this.ease}`;
+		element.style.transition = `transform ${this.smoothness}s ${this.ease}`;
 	}
 
 	/**
@@ -389,20 +387,6 @@ export class Scrolleo {
 
 		//settting the currentScroll for the element
 		element.dataset.currentScroll = scroll.toString();
-	}
-
-	/**
-	 * Scroll a percentage of the window
-	 *
-	 * @param {number} percentage The percentage of the window to scroll
-	 */
-	public scroll(percentage: number): void {
-		let currentScroll: number;
-		this.scrolledElements.forEach(element => {
-			currentScroll = clamp(convertToPx(percentage, this.direction), this.minScroll, this.maxScroll);
-
-			this.applyScroll(element, currentScroll);
-		});
 	}
 
 	/**

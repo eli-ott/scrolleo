@@ -41,7 +41,7 @@ scrolleo.init();
 | Option             | Type                  | Default                             | Description                                                                                                              |
 | ------------------ | --------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | `element`          | `HTMLElement`         |                                     | The Scroll container element                                                                                             |
-| `ease`             | `string`              | `cubic-bezier(0.19,0.57,0.51,0.99)` | An easing method for the scroll 'animation'                                                                              |
+| `ease`             | `string`              | `cubic-bezier(0.19,0.57,0.51,0.99)` | An easing method for the scroll 'animation' WARNING: Will remove other transition from the element                       |
 | `direction`        | `string`              | `vertical`                          | The scroll direction `vertical` or `horizontal` only                                                                     |
 | `smoothness`       | `number`              | `0.25`                              | The smoothness of the scroll, the higher the number the smoother the scroll                                              |
 | `draggable`        | `boolean`             | `false`                             | If we can drag to scroll                                                                                                 |
