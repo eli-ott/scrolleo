@@ -1,5 +1,5 @@
 import type { ScrolleoConstructor, ScrollToOptions } from './types';
-import { clamp, convertToPx } from './utils copy';
+import { clamp, convertToPx } from './utils';
 
 /**
  * The Scrolleo class
