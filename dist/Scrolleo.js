@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Scrolleo = void 0;
-const utils_1 = require("./utils");
+const utils_copy_1 = require("./utils copy");
 /**
  * The Scrolleo class
  */
@@ -30,7 +30,12 @@ class Scrolleo {
         this.wheelSignal = new AbortController();
         /** The drag abort signal */
         this.dragSignal = new AbortController();
-        this.container = container;
+        //setting the selectors for the scrolledElements and the container to use them later
+        this.containerSelector = container;
+        this.elementsToScrollSelector = elementsToScroll;
+        //setting the container and elementsToScroll based on the selectors
+        this.container = document.querySelector(this.containerSelector);
+        this.elementsToScroll = this.elementsToScrollSelector ? document.querySelectorAll(this.elementsToScrollSelector) : null;
         this.ease = ease;
         this.direction = direction;
         this.smoothness = smoothness;
@@ -40,7 +45,6 @@ class Scrolleo {
         this.throttleDelay = throttleDelay;
         this.scrollPercentage = scrollPercentage;
         this.offsetBottom = offsetBottom;
-        this.elementsToScroll = elementsToScroll;
     }
     /**
      * Initializing Scrolleo
@@ -49,6 +53,10 @@ class Scrolleo {
         //we scroll to the top of the window
         window.scroll(0, 0);
         this.maxScroll = this.calculateMaxScroll();
+        //setting the containe and scrolledElements at every initialization
+        //so that if the elements were not in the DOM when the constructor exectued we can still catch them
+        this.container = document.querySelector(this.containerSelector);
+        this.elementsToScroll = this.elementsToScrollSelector ? document.querySelectorAll(this.elementsToScrollSelector) : null;
         //set the elements that needs to be scrolled
         this.setScrolledElements();
         //setting the elements transitions
@@ -56,7 +64,7 @@ class Scrolleo {
             this.setTransition(element);
             //setting the current scroll to 0 for each elements
             element.dataset.currentScroll = '0';
-            element.dataset.scrollStep = (0, utils_1.convertToPx)(this.scrollPercentage, this.direction).toString();
+            element.dataset.scrollStep = (0, utils_copy_1.convertToPx)(this.scrollPercentage, this.direction).toString();
         });
         if (!this.initialized) {
             //allow to initialize multiple time without setting the listeners more than once
@@ -103,10 +111,23 @@ class Scrolleo {
             this.container.querySelectorAll(':scope > *').forEach(element => {
                 this.scrolledElements.push(element);
             });
-            this.container.querySelectorAll(':scope > * [data-scroll-speed]').forEach(element => {
-                this.scrolledElements.push(element);
-            });
         }
+    }
+    /**
+     * Returns the scroll container
+     *
+     * @returns {HTMLElement} The container
+     */
+    getScrollContainer() {
+        return this.container;
+    }
+    /**
+     * Return the elements that needs to be scrolled
+     *
+     * @returns {HTMLElement[]} The scrolled elements
+     */
+    getScrolledElements() {
+        return this.scrolledElements;
     }
     /**
      * Calculate the max possible scroll based on the scroll direction
@@ -115,10 +136,10 @@ class Scrolleo {
      */
     calculateMaxScroll() {
         if (this.direction === 'vertical') {
-            return this.container.getBoundingClientRect().height + this.container.getBoundingClientRect().top - window.innerHeight - (0, utils_1.convertToPx)(this.offsetBottom, this.direction);
+            return this.container.getBoundingClientRect().height + this.container.getBoundingClientRect().top - window.innerHeight - (0, utils_copy_1.convertToPx)(this.offsetBottom, this.direction);
         }
         else if (this.direction === 'horizontal') {
-            return this.container.getBoundingClientRect().width + this.container.getBoundingClientRect().left - window.innerWidth - (0, utils_1.convertToPx)(this.offsetBottom, this.direction);
+            return this.container.getBoundingClientRect().width + this.container.getBoundingClientRect().left - window.innerWidth - (0, utils_copy_1.convertToPx)(this.offsetBottom, this.direction);
         }
         else {
             console.error("Scroll direction is not valid, only possible values are 'vertical' and 'horizontal'");
@@ -234,10 +255,10 @@ class Scrolleo {
             let currentScroll;
             //calculating the scroll depending on the direction the user scroll (up or down)
             if (deltaY < 0) {
-                currentScroll = (0, utils_1.clamp)(parseFloat(element.dataset.currentScroll) - parseFloat(element.dataset.scrollStep), this.minScroll, this.maxScroll);
+                currentScroll = (0, utils_copy_1.clamp)(parseFloat(element.dataset.currentScroll) - parseFloat(element.dataset.scrollStep), this.minScroll, this.maxScroll);
             }
             else {
-                currentScroll = (0, utils_1.clamp)(parseFloat(element.dataset.currentScroll) + parseFloat(element.dataset.scrollStep), this.minScroll, this.maxScroll);
+                currentScroll = (0, utils_copy_1.clamp)(parseFloat(element.dataset.currentScroll) + parseFloat(element.dataset.scrollStep), this.minScroll, this.maxScroll);
             }
             this.applyScroll(element, currentScroll);
         });
@@ -250,7 +271,7 @@ class Scrolleo {
     calculateDrag(mousePosition) {
         let currentScroll;
         this.scrolledElements.forEach(element => {
-            currentScroll = (0, utils_1.clamp)(parseFloat(element.dataset.currentScroll) + (this.dragInitialPosition - mousePosition) * this.dragSpeed, this.minScroll, this.maxScroll);
+            currentScroll = (0, utils_copy_1.clamp)(parseFloat(element.dataset.currentScroll) + (this.dragInitialPosition - mousePosition) * this.dragSpeed, this.minScroll, this.maxScroll);
             this.applyScroll(element, currentScroll);
         });
         this.dragInitialPosition = mousePosition;
@@ -284,9 +305,24 @@ class Scrolleo {
     scroll(percentage) {
         let currentScroll;
         this.scrolledElements.forEach(element => {
-            currentScroll = (0, utils_1.clamp)((0, utils_1.convertToPx)(percentage, this.direction), this.minScroll, this.maxScroll);
+            currentScroll = (0, utils_copy_1.clamp)((0, utils_copy_1.convertToPx)(percentage, this.direction), this.minScroll, this.maxScroll);
             this.applyScroll(element, currentScroll);
         });
+    }
+    /**
+     * Return the current scroll of each scroledElements
+     *
+     * @returns {Array<{element: HTMLElement, currentScroll: number}>[]} The current scroll for each element
+     */
+    getCurrentScroll() {
+        let currentScrolls = [];
+        this.scrolledElements.forEach(element => {
+            currentScrolls.push({
+                element,
+                currentScroll: parseFloat(element.dataset.currentScroll)
+            });
+        });
+        return currentScrolls;
     }
     /**
      * Scroll to a specified element
@@ -303,17 +339,17 @@ class Scrolleo {
         const rect = element.getBoundingClientRect();
         let scrollDistance;
         if (options.align === 'start') {
-            scrollDistance = rect.top - (0, utils_1.convertToPx)(options.margin, this.direction);
+            scrollDistance = rect.top - (0, utils_copy_1.convertToPx)(options.margin, this.direction);
         }
         else if (options.align === 'end') {
-            scrollDistance = rect.bottom - window.innerHeight + (0, utils_1.convertToPx)(options.margin, this.direction);
+            scrollDistance = rect.bottom - window.innerHeight + (0, utils_copy_1.convertToPx)(options.margin, this.direction);
         }
         else {
             console.error("Align option is invalid, only possible values are 'start' and 'end'");
         }
         let currentScroll;
         this.scrolledElements.forEach(element => {
-            currentScroll = (0, utils_1.clamp)(scrollDistance, this.minScroll, this.maxScroll);
+            currentScroll = (0, utils_copy_1.clamp)(scrollDistance, this.minScroll, this.maxScroll);
             this.applyScroll(element, currentScroll);
         });
     }

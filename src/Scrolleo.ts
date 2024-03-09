@@ -1,5 +1,5 @@
 import type { ScrolleoConstructor, ScrollToOptions } from './types';
-import { clamp, convertToPx } from './utils';
+import { clamp, convertToPx } from './utils copy';
 
 /**
  * The Scrolleo class
@@ -26,7 +26,11 @@ export class Scrolleo {
 	/** The percentage of the window to remove at the end of the scroll (default: '0') */
 	offsetBottom: number;
 	/** The elements to scroll, if null will be the direct children of the container (default: 'null') */
-	elementsToScroll: Array<HTMLElement> | null;
+	elementsToScroll: Array<HTMLElement> | NodeListOf<HTMLElement> | null;
+	/** The query selector for the scrolledElements */
+	private elementsToScrollSelector: string | null;
+	/** The query selector for the scroll container */
+	private containerSelector: string;
 	/** The elements that will be scrolled */
 	private scrolledElements: HTMLElement[] = [];
 	/** The minimum scroll the user can do in pixels */
@@ -64,7 +68,14 @@ export class Scrolleo {
 		offsetBottom = 0,
 		elementsToScroll = null
 	}: ScrolleoConstructor) {
-		this.container = container;
+		//setting the selectors for the scrolledElements and the container to use them later
+		this.containerSelector = container;
+		this.elementsToScrollSelector = elementsToScroll;
+
+		//setting the container and elementsToScroll based on the selectors
+		this.container = document.querySelector<HTMLElement>(this.containerSelector)!;
+		this.elementsToScroll = this.elementsToScrollSelector ? (document.querySelectorAll(this.elementsToScrollSelector)! as NodeListOf<HTMLElement>) : null;
+
 		this.ease = ease;
 		this.direction = direction;
 		this.smoothness = smoothness;
@@ -74,7 +85,6 @@ export class Scrolleo {
 		this.throttleDelay = throttleDelay;
 		this.scrollPercentage = scrollPercentage;
 		this.offsetBottom = offsetBottom;
-		this.elementsToScroll = elementsToScroll;
 	}
 
 	/**
@@ -85,6 +95,11 @@ export class Scrolleo {
 		window.scroll(0, 0);
 
 		this.maxScroll = this.calculateMaxScroll();
+
+		//setting the containe and scrolledElements at every initialization
+		//so that if the elements were not in the DOM when the constructor exectued we can still catch them
+		this.container = document.querySelector<HTMLElement>(this.containerSelector)!;
+		this.elementsToScroll = this.elementsToScrollSelector ? (document.querySelectorAll(this.elementsToScrollSelector)! as NodeListOf<HTMLElement>) : null;
 
 		//set the elements that needs to be scrolled
 		this.setScrolledElements();
@@ -143,15 +158,30 @@ export class Scrolleo {
 		this.scrolledElements = [];
 
 		if (this.elementsToScroll) {
-			this.scrolledElements = this.elementsToScroll;
+			this.scrolledElements = this.elementsToScroll as HTMLElement[];
 		} else {
 			this.container.querySelectorAll<HTMLElement>(':scope > *').forEach(element => {
 				this.scrolledElements.push(element);
 			});
-			this.container.querySelectorAll<HTMLElement>(':scope > * [data-scroll-speed]').forEach(element => {
-				this.scrolledElements.push(element);
-			});
 		}
+	}
+
+	/**
+	 * Returns the scroll container
+	 *
+	 * @returns {HTMLElement} The container
+	 */
+	public getScrollContainer(): HTMLElement {
+		return this.container;
+	}
+
+	/**
+	 * Return the elements that needs to be scrolled
+	 *
+	 * @returns {HTMLElement[]} The scrolled elements
+	 */
+	public getScrolledElements(): HTMLElement[] {
+		return this.scrolledElements;
 	}
 
 	/**
@@ -373,6 +403,24 @@ export class Scrolleo {
 
 			this.applyScroll(element, currentScroll);
 		});
+	}
+
+	/**
+	 * Return the current scroll of each scroledElements
+	 *
+	 * @returns {Array<{element: HTMLElement, currentScroll: number}>[]} The current scroll for each element
+	 */
+	public getCurrentScroll(): Array<{ element: HTMLElement; currentScroll: number }> {
+		let currentScrolls: Array<{ element: HTMLElement; currentScroll: number }> = [];
+
+		this.scrolledElements.forEach(element => {
+			currentScrolls.push({
+				element,
+				currentScroll: parseFloat(element.dataset.currentScroll!)
+			});
+		});
+
+		return currentScrolls;
 	}
 
 	/**

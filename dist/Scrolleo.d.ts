@@ -24,7 +24,11 @@ export declare class Scrolleo {
     /** The percentage of the window to remove at the end of the scroll (default: '0') */
     offsetBottom: number;
     /** The elements to scroll, if null will be the direct children of the container (default: 'null') */
-    elementsToScroll: Array<HTMLElement> | null;
+    elementsToScroll: Array<HTMLElement> | NodeListOf<HTMLElement> | null;
+    /** The query selector for the scrolledElements */
+    private elementsToScrollSelector;
+    /** The query selector for the scroll container */
+    private containerSelector;
     /** The elements that will be scrolled */
     private scrolledElements;
     /** The minimum scroll the user can do in pixels */
@@ -71,6 +75,18 @@ export declare class Scrolleo {
      * Set the elements that needs be scrolled
      */
     private setScrolledElements;
+    /**
+     * Returns the scroll container
+     *
+     * @returns {HTMLElement} The container
+     */
+    getScrollContainer(): HTMLElement;
+    /**
+     * Return the elements that needs to be scrolled
+     *
+     * @returns {HTMLElement[]} The scrolled elements
+     */
+    getScrolledElements(): HTMLElement[];
     /**
      * Calculate the max possible scroll based on the scroll direction
      *
@@ -122,6 +138,15 @@ export declare class Scrolleo {
      * @param {number} percentage The percentage of the window to scroll
      */
     scroll(percentage: number): void;
+    /**
+     * Return the current scroll of each scroledElements
+     *
+     * @returns {Array<{element: HTMLElement, currentScroll: number}>[]} The current scroll for each element
+     */
+    getCurrentScroll(): Array<{
+        element: HTMLElement;
+        currentScroll: number;
+    }>;
     /**
      * Scroll to a specified element
      *
