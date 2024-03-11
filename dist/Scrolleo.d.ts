@@ -148,4 +148,28 @@ export declare class Scrolleo {
      * @param {ScrollTo} options The options of the scrollTo
      */
     scrollTo(element: HTMLElement, options?: ScrollToOptions): void;
+    /**
+     * Activate the ability to scroll
+     */
+    allowScroll(): void;
+    /**
+     * Disable the ability to scroll
+     */
+    disableScroll(): void;
+    /**
+     * Toggle the scroll. If it was true will become false, and vice versa
+     */
+    toggleScroll(): void;
+    /**
+     * Allow the drag ability (draggable must be set to true)
+     */
+    allowDrag(): void;
+    /**
+     * Disable the drag ability (draggable must be set to true)
+     */
+    disableDrag(): void;
+    /**
+     * Toggle the scroll. If it was true will become false, and vice versa (draggable must be set to true)
+     */
+    toggleDrag(): void;
 }

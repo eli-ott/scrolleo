@@ -340,5 +340,44 @@ class Scrolleo {
             this.applyScroll(element, currentScroll);
         });
     }
+    /**
+     * Activate the ability to scroll
+     */
+    allowScroll() {
+        this.canScroll = true;
+    }
+    /**
+     * Disable the ability to scroll
+     */
+    disableScroll() {
+        this.canScroll = false;
+    }
+    /**
+     * Toggle the scroll. If it was true will become false, and vice versa
+     */
+    toggleScroll() {
+        this.canScroll = !this.canScroll;
+    }
+    /**
+     * Allow the drag ability (draggable must be set to true)
+     */
+    allowDrag() {
+        if (this.draggable)
+            this.canDrag = true;
+    }
+    /**
+     * Disable the drag ability (draggable must be set to true)
+     */
+    disableDrag() {
+        if (this.draggable)
+            this.canDrag = false;
+    }
+    /**
+     * Toggle the scroll. If it was true will become false, and vice versa (draggable must be set to true)
+     */
+    toggleDrag() {
+        if (this.draggable)
+            this.canDrag = !this.canDrag;
+    }
 }
 exports.Scrolleo = Scrolleo;
