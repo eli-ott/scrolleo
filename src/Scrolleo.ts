@@ -243,6 +243,7 @@ export class Scrolleo {
 				}
 			},
 			{
+				passive: false,
 				signal: this.wheelSignal.signal
 			}
 		);
@@ -264,6 +265,7 @@ export class Scrolleo {
 					}
 				},
 				{
+					passive: false,
 					signal: this.dragSignal.signal
 				}
 			);
@@ -285,6 +287,7 @@ export class Scrolleo {
 					}
 				},
 				{
+					passive: false,
 					signal: this.dragSignal.signal
 				}
 			);
@@ -300,6 +303,7 @@ export class Scrolleo {
 					this.dragInitialPosition = 0;
 				},
 				{
+					passive: false,
 					signal: this.dragSignal.signal
 				}
 			);
@@ -315,6 +319,7 @@ export class Scrolleo {
 					this.dragInitialPosition = 0;
 				},
 				{
+					passive: false,
 					signal: this.dragSignal.signal
 				}
 			);

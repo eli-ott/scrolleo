@@ -178,6 +178,7 @@ class Scrolleo {
                 this.calculateScroll(e.deltaY);
             }
         }, {
+            passive: false,
             signal: this.wheelSignal.signal
         });
         if (this.draggable) {
@@ -194,6 +195,7 @@ class Scrolleo {
                     this.dragInitialPosition = e.clientY;
                 }
             }, {
+                passive: false,
                 signal: this.dragSignal.signal
             });
             scrollTrigger.addEventListener('mousemove', e => {
@@ -211,6 +213,7 @@ class Scrolleo {
                     }
                 }
             }, {
+                passive: false,
                 signal: this.dragSignal.signal
             });
             scrollTrigger.addEventListener('mouseup', () => {
@@ -221,6 +224,7 @@ class Scrolleo {
                 //reseting the initial drag position
                 this.dragInitialPosition = 0;
             }, {
+                passive: false,
                 signal: this.dragSignal.signal
             });
             scrollTrigger.addEventListener('mouseleave', () => {
@@ -231,6 +235,7 @@ class Scrolleo {
                 //reseting the initial drag position
                 this.dragInitialPosition = 0;
             }, {
+                passive: false,
                 signal: this.dragSignal.signal
             });
         }
