@@ -229,7 +229,7 @@ export class Scrolleo {
 		//avoid the default scroll on other elements
 		document.querySelector<HTMLElement>('body')!.style.overflow = 'hidden';
 
-		const scrollTrigger = global ? window : this.container;
+		const scrollTrigger = this.globalScroll ? window : this.container;
 
 		scrollTrigger.addEventListener(
 			'wheel',

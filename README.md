@@ -22,7 +22,7 @@ import { Scrolleo } from 'scrolleo';
 
 ```JS
 const scrolleo = new Scrolleo({
-	element: document.querySelector('your-element'),
+	container: 'your-element',
 });
 scrolleo.init();
 ```
@@ -31,7 +31,7 @@ scrolleo.init();
 
 ```TS
 const scrolleo = new Scrolleo({
-	element: document.querySelector<HTMLElement>('your-element')!,
+	container: 'your-element',
 });
 scrolleo.init();
 ```
@@ -40,7 +40,7 @@ scrolleo.init();
 
 | Option             | Type                  | Default                             | Description                                                                                                              |
 | ------------------ | --------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `element`          | `HTMLElement`         |                                     | The Scroll container element                                                                                             |
+| `containe`         | `string`              |                                     | The Scroll container query selector string                                                                               |
 | `ease`             | `string`              | `cubic-bezier(0.19,0.57,0.51,0.99)` | An easing method for the scroll 'animation' WARNING: Will remove other transition from the element                       |
 | `direction`        | `string`              | `vertical`                          | The scroll direction `vertical` or `horizontal` only                                                                     |
 | `smoothness`       | `number`              | `0.25`                              | The smoothness of the scroll, the higher the number the smoother the scroll                                              |
