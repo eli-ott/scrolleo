@@ -234,7 +234,7 @@ export class Scrolleo {
 		scrollTrigger.addEventListener(
 			'wheel',
 			e => {
-				e.preventDefault();
+				// e.preventDefault();
 
 				if (this.canScroll) {
 					if (this.throttle) this.throttleScroll();

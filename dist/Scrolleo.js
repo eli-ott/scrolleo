@@ -171,7 +171,7 @@ class Scrolleo {
         document.querySelector('body').style.overflow = 'hidden';
         const scrollTrigger = this.globalScroll ? window : this.container;
         scrollTrigger.addEventListener('wheel', e => {
-            e.preventDefault();
+            // e.preventDefault();
             if (this.canScroll) {
                 if (this.throttle)
                     this.throttleScroll();
