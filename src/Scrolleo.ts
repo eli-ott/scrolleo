@@ -27,6 +27,8 @@ export class Scrolleo {
 	offsetBottom: number;
 	/** The elements to scroll, if null will be the direct children of the container (default: 'null') */
 	elementsToScroll: Array<HTMLElement> | NodeListOf<HTMLElement> | null;
+	/** If the scroll listener is set globally, so to the whole window (default: false) */
+	globalScroll: boolean;
 	/** The query selector for the scrolledElements */
 	private elementsToScrollSelector: string | null;
 	/** The query selector for the scroll container */
@@ -66,7 +68,8 @@ export class Scrolleo {
 		throttleDelay = 100,
 		scrollPercentage = 20,
 		offsetBottom = 0,
-		elementsToScroll = null
+		elementsToScroll = null,
+		globalScroll = false
 	}: ScrolleoConstructor) {
 		//setting the selectors for the scrolledElements and the container to use them later
 		this.containerSelector = container;
@@ -85,6 +88,7 @@ export class Scrolleo {
 		this.throttleDelay = throttleDelay;
 		this.scrollPercentage = scrollPercentage;
 		this.offsetBottom = offsetBottom;
+		this.globalScroll = globalScroll;
 	}
 
 	/**
@@ -225,7 +229,9 @@ export class Scrolleo {
 		//avoid the default scroll on other elements
 		document.querySelector<HTMLElement>('body')!.style.overflow = 'hidden';
 
-		this.container.addEventListener(
+		const scrollTrigger = global ? window : this.container;
+
+		scrollTrigger.addEventListener(
 			'wheel',
 			e => {
 				e.preventDefault();
@@ -242,7 +248,7 @@ export class Scrolleo {
 		);
 
 		if (this.draggable) {
-			this.container.addEventListener(
+			scrollTrigger.addEventListener(
 				'mousedown',
 				e => {
 					//preventing the user to scroll
@@ -262,7 +268,7 @@ export class Scrolleo {
 				}
 			);
 
-			this.container.addEventListener(
+			scrollTrigger.addEventListener(
 				'mousemove',
 				e => {
 					if (this.canDrag) {
@@ -283,7 +289,7 @@ export class Scrolleo {
 				}
 			);
 
-			this.container.addEventListener(
+			scrollTrigger.addEventListener(
 				'mouseup',
 				() => {
 					//allowing the user to sroll again
@@ -298,7 +304,7 @@ export class Scrolleo {
 				}
 			);
 
-			this.container.addEventListener(
+			scrollTrigger.addEventListener(
 				'mouseleave',
 				() => {
 					//allowing the user to sroll again

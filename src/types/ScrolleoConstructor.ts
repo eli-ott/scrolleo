@@ -24,4 +24,6 @@ export interface ScrolleoConstructor {
 	offsetBottom?: number;
 	/** The name of the elements to scroll (using querySelectorAll), if null will be the direct children of the container (default: 'null') */
 	elementsToScroll?: string | null;
+	/** If the scroll listener is set globally, so to the whole window (default: false) */
+	globalScroll?: boolean;
 }

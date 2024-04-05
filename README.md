@@ -51,6 +51,7 @@ scrolleo.init();
 | `scrollPercentage` | `number`              | `20`                                | The percentage of the window that gets scrolled each time                                                                |
 | `offsetBottom`     | `number`              | `0`                                 | The percentage of the window to remove at the end of the scroll                                                          |
 | `elementsToScroll` | `Array<HTMLElements>` | `null`                              | The elements to scroll, if null will be the direct children of the container.                                            |
+| `globalScroll`     | `boolean`             | `false`                             | If the scroll listener is set globally, so to the whole window (default: false)                                          |
 
 ## Instance methods
 
