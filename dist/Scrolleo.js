@@ -11,7 +11,7 @@ class Scrolleo {
      *
      * @param {ScrolleoConstructor} ScrolleoConstructor The constructor for the scroll
      */
-    constructor({ container, ease = 'cubic-bezier(0.19,0.57,0.51,0.99)', direction = 'vertical', smoothness = 0.25, draggable = false, dragSpeed = 1, throttle = true, throttleDelay = 100, scrollPercentage = 20, offsetBottom = 0, elementsToScroll = null }) {
+    constructor({ container, ease = 'cubic-bezier(0.19,0.57,0.51,0.99)', direction = 'vertical', smoothness = 0.25, draggable = false, dragSpeed = 1, throttle = true, throttleDelay = 100, scrollPercentage = 20, offsetBottom = 0, elementsToScroll = null, globalScroll = false }) {
         /** The elements that will be scrolled */
         this.scrolledElements = [];
         /** The minimum scroll the user can do in pixels */
@@ -45,6 +45,7 @@ class Scrolleo {
         this.throttleDelay = throttleDelay;
         this.scrollPercentage = scrollPercentage;
         this.offsetBottom = offsetBottom;
+        this.globalScroll = globalScroll;
     }
     /**
      * Initializing Scrolleo
@@ -168,7 +169,8 @@ class Scrolleo {
     setListener() {
         //avoid the default scroll on other elements
         document.querySelector('body').style.overflow = 'hidden';
-        this.container.addEventListener('wheel', e => {
+        const scrollTrigger = global ? window : this.container;
+        scrollTrigger.addEventListener('wheel', e => {
             e.preventDefault();
             if (this.canScroll) {
                 if (this.throttle)
@@ -179,7 +181,7 @@ class Scrolleo {
             signal: this.wheelSignal.signal
         });
         if (this.draggable) {
-            this.container.addEventListener('mousedown', e => {
+            scrollTrigger.addEventListener('mousedown', e => {
                 //preventing the user to scroll
                 this.canScroll = false;
                 //allowing the user to drag
@@ -194,7 +196,7 @@ class Scrolleo {
             }, {
                 signal: this.dragSignal.signal
             });
-            this.container.addEventListener('mousemove', e => {
+            scrollTrigger.addEventListener('mousemove', e => {
                 if (this.canDrag) {
                     e.preventDefault();
                     if (this.direction === 'horizontal') {
@@ -211,7 +213,7 @@ class Scrolleo {
             }, {
                 signal: this.dragSignal.signal
             });
-            this.container.addEventListener('mouseup', () => {
+            scrollTrigger.addEventListener('mouseup', () => {
                 //allowing the user to sroll again
                 this.canScroll = true;
                 //preventing the user to drag
@@ -221,7 +223,7 @@ class Scrolleo {
             }, {
                 signal: this.dragSignal.signal
             });
-            this.container.addEventListener('mouseleave', () => {
+            scrollTrigger.addEventListener('mouseleave', () => {
                 //allowing the user to sroll again
                 this.canScroll = true;
                 //preventing the user to drag

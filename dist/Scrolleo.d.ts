@@ -25,6 +25,8 @@ export declare class Scrolleo {
     offsetBottom: number;
     /** The elements to scroll, if null will be the direct children of the container (default: 'null') */
     elementsToScroll: Array<HTMLElement> | NodeListOf<HTMLElement> | null;
+    /** If the scroll listener is set globally, so to the whole window (default: false) */
+    globalScroll: boolean;
     /** The query selector for the scrolledElements */
     private elementsToScrollSelector;
     /** The query selector for the scroll container */
@@ -52,7 +54,7 @@ export declare class Scrolleo {
      *
      * @param {ScrolleoConstructor} ScrolleoConstructor The constructor for the scroll
      */
-    constructor({ container, ease, direction, smoothness, draggable, dragSpeed, throttle, throttleDelay, scrollPercentage, offsetBottom, elementsToScroll }: ScrolleoConstructor);
+    constructor({ container, ease, direction, smoothness, draggable, dragSpeed, throttle, throttleDelay, scrollPercentage, offsetBottom, elementsToScroll, globalScroll }: ScrolleoConstructor);
     /**
      * Initializing Scrolleo
      */
