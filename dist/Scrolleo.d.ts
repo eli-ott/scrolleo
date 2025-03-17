@@ -54,17 +54,11 @@ export declare class Scrolleo {
      *
      * @param {ScrolleoConstructor} ScrolleoConstructor The constructor for the scroll
      */
-    constructor({ container, ease, direction, smoothness, draggable, dragSpeed, throttle, throttleDelay, scrollPercentage, offsetBottom, elementsToScroll, globalScroll }: ScrolleoConstructor);
+    constructor({ container, ease, direction, smoothness, draggable, dragSpeed, throttle, throttleDelay, scrollPercentage, offsetBottom, elementsToScroll, globalScroll, }: ScrolleoConstructor);
     /**
      * Initializing Scrolleo
      */
     init(): void;
-    /**
-     * If the scrolleo was initialized
-     *
-     * @returns {boolean} If the scrolleo was initialized
-     */
-    isInit(): boolean;
     /**
      * Reset the whole scroll and stops the event listeners
      */
@@ -78,29 +72,11 @@ export declare class Scrolleo {
      */
     private setScrolledElements;
     /**
-     * Returns the scroll container
-     *
-     * @returns {HTMLElement} The container
-     */
-    getScrollContainer(): HTMLElement;
-    /**
-     * Return the elements that needs to be scrolled
-     *
-     * @returns {HTMLElement[]} The scrolled elements
-     */
-    getScrolledElements(): HTMLElement[];
-    /**
      * Calculate the max possible scroll based on the scroll direction
      *
      * @returns {number} The max possible scroll in pixels
      */
     private calculateMaxScroll;
-    /**
-     * Return the calculated max scroll
-     *
-     * @returns {number} The max scroll
-     */
-    getMaxScroll(): number;
     /**
      * Create the scroll animation for the element
      *
@@ -135,15 +111,6 @@ export declare class Scrolleo {
      */
     private applyScroll;
     /**
-     * Return the current scroll of each scroledElements
-     *
-     * @returns {Array<{element: HTMLElement, currentScroll: number}>[]} The current scroll for each element
-     */
-    getCurrentScroll(): Array<{
-        element: HTMLElement;
-        currentScroll: number;
-    }>;
-    /**
      * Scroll to a specified element
      *
      * @param {HTMLElement} element The element to scroll to
@@ -174,4 +141,37 @@ export declare class Scrolleo {
      * Toggle the scroll. If it was true will become false, and vice versa (draggable must be set to true)
      */
     toggleDrag(): void;
+    /**
+     * Return the current scroll of each scroledElements
+     *
+     * @returns {Array<{element: HTMLElement, currentScroll: number}>[]} The current scroll for each element
+     */
+    get getCurrentScroll(): Array<{
+        element: HTMLElement;
+        currentScroll: number;
+    }>;
+    /**
+     * Return the calculated max scroll
+     *
+     * @returns {number} The max scroll
+     */
+    get getMaxScroll(): number;
+    /**
+     * Returns the scroll container
+     *
+     * @returns {HTMLElement} The container
+     */
+    get getScrollContainer(): HTMLElement;
+    /**
+     * Return the elements that needs to be scrolled
+     *
+     * @returns {HTMLElement[]} The scrolled elements
+     */
+    get getScrolledElements(): HTMLElement[];
+    /**
+     * If the scrolleo was initialized
+     *
+     * @returns {boolean} If the scrolleo was initialized
+     */
+    get isInit(): boolean;
 }

@@ -69,7 +69,7 @@ export class Scrolleo {
 		scrollPercentage = 20,
 		offsetBottom = 0,
 		elementsToScroll = null,
-		globalScroll = false
+		globalScroll = false,
 	}: ScrolleoConstructor) {
 		//setting the selectors for the scrolledElements and the container to use them later
 		this.containerSelector = container;
@@ -77,7 +77,9 @@ export class Scrolleo {
 
 		//setting the container and elementsToScroll based on the selectors
 		this.container = document.querySelector<HTMLElement>(this.containerSelector)!;
-		this.elementsToScroll = this.elementsToScrollSelector ? (document.querySelectorAll(this.elementsToScrollSelector)! as NodeListOf<HTMLElement>) : null;
+		this.elementsToScroll = this.elementsToScrollSelector
+			? (document.querySelectorAll(this.elementsToScrollSelector)! as NodeListOf<HTMLElement>)
+			: null;
 
 		this.ease = ease;
 		this.direction = direction;
@@ -103,13 +105,15 @@ export class Scrolleo {
 		//setting the containe and scrolledElements at every initialization
 		//so that if the elements were not in the DOM when the constructor exectued we can still catch them
 		this.container = document.querySelector<HTMLElement>(this.containerSelector)!;
-		this.elementsToScroll = this.elementsToScrollSelector ? (document.querySelectorAll(this.elementsToScrollSelector)! as NodeListOf<HTMLElement>) : null;
+		this.elementsToScroll = this.elementsToScrollSelector
+			? (document.querySelectorAll(this.elementsToScrollSelector)! as NodeListOf<HTMLElement>)
+			: null;
 
 		//set the elements that needs to be scrolled
 		this.setScrolledElements();
 
 		//setting the elements transitions
-		this.scrolledElements.forEach(element => {
+		this.scrolledElements.forEach((element) => {
 			this.setTransition(element);
 
 			//setting the current scroll to 0 for each elements
@@ -124,15 +128,6 @@ export class Scrolleo {
 
 			this.initialized = true;
 		}
-	}
-
-	/**
-	 * If the scrolleo was initialized
-	 *
-	 * @returns {boolean} If the scrolleo was initialized
-	 */
-	public isInit(): boolean {
-		return this.initialized;
 	}
 
 	/**
@@ -164,28 +159,10 @@ export class Scrolleo {
 		if (this.elementsToScroll) {
 			this.scrolledElements = this.elementsToScroll as HTMLElement[];
 		} else {
-			this.container.querySelectorAll<HTMLElement>(':scope > *').forEach(element => {
+			this.container.querySelectorAll<HTMLElement>(':scope > *').forEach((element) => {
 				this.scrolledElements.push(element);
 			});
 		}
-	}
-
-	/**
-	 * Returns the scroll container
-	 *
-	 * @returns {HTMLElement} The container
-	 */
-	public getScrollContainer(): HTMLElement {
-		return this.container;
-	}
-
-	/**
-	 * Return the elements that needs to be scrolled
-	 *
-	 * @returns {HTMLElement[]} The scrolled elements
-	 */
-	public getScrolledElements(): HTMLElement[] {
-		return this.scrolledElements;
 	}
 
 	/**
@@ -195,22 +172,23 @@ export class Scrolleo {
 	 */
 	private calculateMaxScroll(): number {
 		if (this.direction === 'vertical') {
-			return this.container.getBoundingClientRect().height + this.container.getBoundingClientRect().top - window.innerHeight - convertToPx(this.offsetBottom, this.direction);
+			return (
+				this.container.getBoundingClientRect().height +
+				this.container.getBoundingClientRect().top -
+				window.innerHeight -
+				convertToPx(this.offsetBottom, this.direction)
+			);
 		} else if (this.direction === 'horizontal') {
-			return this.container.getBoundingClientRect().width + this.container.getBoundingClientRect().left - window.innerWidth - convertToPx(this.offsetBottom, this.direction);
+			return (
+				this.container.getBoundingClientRect().width +
+				this.container.getBoundingClientRect().left -
+				window.innerWidth -
+				convertToPx(this.offsetBottom, this.direction)
+			);
 		} else {
 			console.error("Scroll direction is not valid, only possible values are 'vertical' and 'horizontal'");
 			throw new Error("Scroll direction is not valid, only possible values are 'vertical' and 'horizontal'");
 		}
-	}
-
-	/**
-	 * Return the calculated max scroll
-	 *
-	 * @returns {number} The max scroll
-	 */
-	public getMaxScroll(): number {
-		return this.maxScroll;
 	}
 
 	/**
@@ -233,9 +211,7 @@ export class Scrolleo {
 
 		scrollTrigger.addEventListener(
 			'wheel',
-			e => {
-				// e.preventDefault();
-
+			(e) => {
 				if (this.canScroll) {
 					if (this.throttle) this.throttleScroll();
 
@@ -244,14 +220,14 @@ export class Scrolleo {
 			},
 			{
 				passive: false,
-				signal: this.wheelSignal.signal
+				signal: this.wheelSignal.signal,
 			}
 		);
 
 		if (this.draggable) {
 			scrollTrigger.addEventListener(
 				'mousedown',
-				e => {
+				(e) => {
 					//preventing the user to scroll
 					this.canScroll = false;
 					//allowing the user to drag
@@ -266,13 +242,13 @@ export class Scrolleo {
 				},
 				{
 					passive: false,
-					signal: this.dragSignal.signal
+					signal: this.dragSignal.signal,
 				}
 			);
 
 			scrollTrigger.addEventListener(
 				'mousemove',
-				e => {
+				(e) => {
 					if (this.canDrag) {
 						e.preventDefault();
 
@@ -288,7 +264,7 @@ export class Scrolleo {
 				},
 				{
 					passive: false,
-					signal: this.dragSignal.signal
+					signal: this.dragSignal.signal,
 				}
 			);
 
@@ -304,7 +280,7 @@ export class Scrolleo {
 				},
 				{
 					passive: false,
-					signal: this.dragSignal.signal
+					signal: this.dragSignal.signal,
 				}
 			);
 
@@ -320,7 +296,7 @@ export class Scrolleo {
 				},
 				{
 					passive: false,
-					signal: this.dragSignal.signal
+					signal: this.dragSignal.signal,
 				}
 			);
 		}
@@ -346,14 +322,22 @@ export class Scrolleo {
 		//calculating the max scroll if it changes
 		this.maxScroll = this.calculateMaxScroll();
 
-		this.scrolledElements.forEach(element => {
+		this.scrolledElements.forEach((element) => {
 			let currentScroll: number;
 
 			//calculating the scroll depending on the direction the user scroll (up or down)
 			if (deltaY < 0) {
-				currentScroll = clamp(parseFloat(element.dataset.currentScroll!) - parseFloat(element.dataset.scrollStep!), this.minScroll, this.maxScroll);
+				currentScroll = clamp(
+					parseFloat(element.dataset.currentScroll!) - parseFloat(element.dataset.scrollStep!),
+					this.minScroll,
+					this.maxScroll
+				);
 			} else {
-				currentScroll = clamp(parseFloat(element.dataset.currentScroll!) + parseFloat(element.dataset.scrollStep!), this.minScroll, this.maxScroll);
+				currentScroll = clamp(
+					parseFloat(element.dataset.currentScroll!) + parseFloat(element.dataset.scrollStep!),
+					this.minScroll,
+					this.maxScroll
+				);
 			}
 
 			this.applyScroll(element, currentScroll);
@@ -368,8 +352,12 @@ export class Scrolleo {
 	private calculateDrag(mousePosition: number): void {
 		let currentScroll: number;
 
-		this.scrolledElements.forEach(element => {
-			currentScroll = clamp(parseFloat(element.dataset.currentScroll!) + (this.dragInitialPosition - mousePosition) * this.dragSpeed, this.minScroll, this.maxScroll);
+		this.scrolledElements.forEach((element) => {
+			currentScroll = clamp(
+				parseFloat(element.dataset.currentScroll!) + (this.dragInitialPosition - mousePosition) * this.dragSpeed,
+				this.minScroll,
+				this.maxScroll
+			);
 
 			this.applyScroll(element, currentScroll);
 		});
@@ -401,24 +389,6 @@ export class Scrolleo {
 	}
 
 	/**
-	 * Return the current scroll of each scroledElements
-	 *
-	 * @returns {Array<{element: HTMLElement, currentScroll: number}>[]} The current scroll for each element
-	 */
-	public getCurrentScroll(): Array<{ element: HTMLElement; currentScroll: number }> {
-		let currentScrolls: Array<{ element: HTMLElement; currentScroll: number }> = [];
-
-		this.scrolledElements.forEach(element => {
-			currentScrolls.push({
-				element,
-				currentScroll: parseFloat(element.dataset.currentScroll!)
-			});
-		});
-
-		return currentScrolls;
-	}
-
-	/**
 	 * Scroll to a specified element
 	 *
 	 * @param {HTMLElement} element The element to scroll to
@@ -428,25 +398,35 @@ export class Scrolleo {
 		element: HTMLElement,
 		options: ScrollToOptions = {
 			align: 'start',
-			margin: 0
+			margin: 0,
 		}
 	): void {
 		if (!element) console.error('scrollTo element is undefined');
 
+		// Set the default values of the elements so the user don't have to
+		options.margin = options.margin ?? 0;
+		options.align = options.align ?? 'start';
+
 		const rect: DOMRect = element.getBoundingClientRect();
 
-		let scrollDistance: number;
-		if (options.align === 'start') {
-			scrollDistance = rect.top - convertToPx(options.margin!, this.direction);
-		} else if (options.align === 'end') {
-			scrollDistance = rect.bottom - window.innerHeight + convertToPx(options.margin!, this.direction);
-		} else {
-			console.error("Align option is invalid, only possible values are 'start' and 'end'");
+		let scrollDistance: number = 0;
+		switch (options.align) {
+			case 'start':
+				scrollDistance = rect.top - convertToPx(options.margin, this.direction);
+				break;
+			case 'center':
+				scrollDistance = rect.top - (window.innerHeight / 2 - rect.height / 2) - convertToPx(options.margin, this.direction);
+				break;
+			case 'end':
+				scrollDistance = rect.bottom - window.innerHeight - convertToPx(options.margin, this.direction);
+				break;
+			default:
+				console.error("Align option is invalid, only possible values are 'start', 'center', 'end'");
 		}
 
 		let currentScroll: number;
-		this.scrolledElements.forEach(element => {
-			currentScroll = clamp(scrollDistance, this.minScroll, this.maxScroll);
+		this.scrolledElements.forEach((element) => {
+			currentScroll = clamp(scrollDistance + parseInt(element.dataset.currentScroll ?? '0'), this.minScroll, this.maxScroll);
 
 			this.applyScroll(element, currentScroll);
 		});
@@ -492,5 +472,61 @@ export class Scrolleo {
 	 */
 	public toggleDrag(): void {
 		if (this.draggable) this.canDrag = !this.canDrag;
+	}
+
+	//* GETTERS SECTION
+
+	/**
+	 * Return the current scroll of each scroledElements
+	 *
+	 * @returns {Array<{element: HTMLElement, currentScroll: number}>[]} The current scroll for each element
+	 */
+	public get getCurrentScroll(): Array<{ element: HTMLElement; currentScroll: number }> {
+		const currentScrolls: Array<{ element: HTMLElement; currentScroll: number }> = [];
+
+		this.scrolledElements.forEach((element) => {
+			currentScrolls.push({
+				element,
+				currentScroll: parseFloat(element.dataset.currentScroll!),
+			});
+		});
+
+		return currentScrolls;
+	}
+
+	/**
+	 * Return the calculated max scroll
+	 *
+	 * @returns {number} The max scroll
+	 */
+	public get getMaxScroll(): number {
+		return this.maxScroll;
+	}
+
+	/**
+	 * Returns the scroll container
+	 *
+	 * @returns {HTMLElement} The container
+	 */
+	public get getScrollContainer(): HTMLElement {
+		return this.container;
+	}
+
+	/**
+	 * Return the elements that needs to be scrolled
+	 *
+	 * @returns {HTMLElement[]} The scrolled elements
+	 */
+	public get getScrolledElements(): HTMLElement[] {
+		return this.scrolledElements;
+	}
+
+	/**
+	 * If the scrolleo was initialized
+	 *
+	 * @returns {boolean} If the scrolleo was initialized
+	 */
+	public get isInit(): boolean {
+		return this.initialized;
 	}
 }

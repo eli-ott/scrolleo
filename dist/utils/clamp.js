@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = clamp;
 /**
  * Clamp a value between a min and a max
  * Inverting min and max because scroll values are negative
@@ -13,3 +12,4 @@ exports.default = clamp;
 function clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);
 }
+exports.default = clamp;
