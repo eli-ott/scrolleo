@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = convertToPx;
 /**
  * Convert the scroll step from vw/vh to px
  *
@@ -12,4 +13,3 @@ function convertToPx(value, direction) {
         return Math.round((value * window.outerWidth) / 100);
     return Math.round((value * window.outerHeight) / 100);
 }
-exports.default = convertToPx;

@@ -139,7 +139,7 @@ export class Scrolleo {
 	 * Reset the whole scroll and stops the event listeners
 	 */
 	public destroy(): void {
-		document.querySelector<HTMLElement>('body')!.style.overflow = 'scroll';
+		document.querySelector<HTMLElement>('body')!.style.overflow = '';
 		this.canScroll = false;
 		this.maxScroll = 0;
 		this.removeListeners();

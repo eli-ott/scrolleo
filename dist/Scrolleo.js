@@ -86,7 +86,7 @@ class Scrolleo {
      * Reset the whole scroll and stops the event listeners
      */
     destroy() {
-        document.querySelector('body').style.overflow = 'scroll';
+        document.querySelector('body').style.overflow = '';
         this.canScroll = false;
         this.maxScroll = 0;
         this.removeListeners();
